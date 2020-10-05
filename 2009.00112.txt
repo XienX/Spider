@@ -1,0 +1,1829 @@
+0
+2
+0
+2
+p
+e
+S
+4
+]
+E
+N
+.
+s
+c
+[
+2
+v
+2
+1
+1
+0
+0
+.
+9
+0
+0
+2
+:
+v
+i
+X
+r
+a
+The Computational Capacity of Memristor Reservoirs
+Forrest C. Sheldon1 , Artemy Kolchinsky2 , Francesco Caravelli1
+1 Theoretical Division and Center for Nonlinear Studies,
+Los Alamos National Laboratory, Los Alamos, New Mexico 87545, USA
+2 Santa Fe Institute, 1399 Hyde Park Road, Santa Fe, NM 87501, USA
+Reservoir computing is a machine learning paradigm in which a high-dimensional dynamical system, or
+reservoir, is used to approximate and perform predictions on time series data. Its simple training procedure allows
+for very large reservoirs that can provide powerful computational capabilities. The scale, speed and power-usage
+characteristics of reservoir computing could be enhanced by constructing reservoirs out of electronic circuits,
+but this requires a precise understanding of how such circuits process and store information. We analyze the
+feasibility and optimal design of such reservoirs by considering the equations of motion of circuits that include
+both linear elements (resistors, inductors, and capacitors) and nonlinear memory elements (called memristors).
+This complements previous studies, which have examined such systems through simulation and experiment.
+We provide analytic results regarding the fundamental feasibility of such reservoirs, and give a systematic
+characterization of their computational properties, examining the types of input-output relationships that may be
+approximated. This allows us to design reservoirs with optimal properties in terms of their ability to reconstruct
+a certain signal (or functions thereof ). In particular, by introducing measures of the total linear and nonlinear
+computational capacities of the reservoir, we are able to design electronic circuits whose total computation
+capacity scales linearly with the system size. Comparison with conventional echo state reservoirs show that
+these electronic reservoirs can match or exceed their performance in a form that may be directly implemented in
+hardware.
+I.
+INTRODUCTION
+Reservoir computing (RC) [1–3] is a recently-proposed
+paradigm for performing computations on time series data,
+which combines a high-dimensional driven dynamical sys-
+tem (or reservoir) with a simple learning algorithm. RC has
+proven to be a powerful tool in a wide variety of signal pro-
+cessing tasks, including forecasting [1], pattern generation and
+classiﬁcation [4], adaptive ﬁltering and prediction of chaotic
+systems [5]. Recent extensions of reservoir computing to
+spatio-temporal chaotic systems [6] have proven surprisingly
+eﬀective, and are under active investigation.
+Central to the success of reservoir computation is the use
+of large, recurrently connected reservoirs to generate nonlin-
+ear transformations and store memories of the driving signal.
+This has generated interest in developing nanoscale electronic
+reservoirs with large number of elements [7], incorporating
+both linear components (such as resistors, inductors, and ca-
+pacitors) and nonlinear components such as memristors. Mem-
+ristors, or “resistors with memory”, are nanoscale devices that
+allow the input of memory degrees of freedom in the electrical
+response of certain materials. The currents ﬂowing through
+these devices cause a rearrangement of ions, leading to a per-
+sistent (but also reversible) change in resistance. Memristors
+oﬀer the possibility of harnessing both nonlinear behavior and
+non-trivial memory in electronic circuits. For this reason, spe-
+cialized circuits composed of large numbers of such devices
+promise a new generation of computational hardware operat-
+ing orders of magnitude faster, and at far lower power, than
+traditional digital circuitry [8–13].
+The success of reservoir computing requires a precise under-
+standing of how the reservoir processes and stores information.
+It is known how to optimize performance and tune parameters
+in conventional reservoirs such as echo state networks (ESNs)
+[3]. However, electronic reservoirs based on memristors have
+some attention lately, with most work being based on simu-
+lations or experiments [14–16], and some analytical work in
+[17, 18]. In this paper we provide a systematic and analytical
+study of the computational capacity of memristor reservoirs
+with diﬀerent architectures.
+In this paper, we ﬁll this gap by ﬁrst characterizing the types
+of input-output relationships can be computed by various elec-
+trical circuits with memory. We then utilize this characteri-
+zation to guarantee three speciﬁc computational properties of
+electronic reservoirs: feasibility, tunability, and scalability. In
+order to be feasible as a reservoir, a driven dynamical sys-
+tem must satisfy a set of properties which guarantee that its
+state encodes an informative function of the driving signal;
+we establish feasibility for models of linear/LRC (inductor-
+resistor-capacitor) and memristor reservoirs. A reservoir’s
+computational properties must also be tunable to the compu-
+tational problem at hand. We characterize the input-output
+relationships natural to electronic reservoirs, in the process
+showing how memristors may be viewed as a source of non-
+linear computations. We then demonstrate how to combine
+linear and nonlinear elements to achieve a speciﬁc computa-
+tional task (that of approximating a 2nd order ﬁlter). Lastly,
+the capacity of the reservoir to perform useful computations
+should scale as the size (i.e., dimensionality) of the reservoir
+is increased. In particular, one of the main motivation for elec-
+tronic reservoirs is the potential to achieve very large reservoir
+sizes, but such increases are useless if they do not lead to im-
+proved computational capacities of the reservoir. Optimally,
+the number of linearly independent inputs that the reservoir
+can reconstruct should scale linearly with the reservoir size —
+i.e., to borrow a term from statistical physics, they should they
+should be extensive in reservoir size. For both LRC and mem-
+ristor reservoirs, we consider measures of linear and nonlinear
+computational capacity, and show that they can be made to
+scale extensively.
+2
+the second requires that the this function carries information
+about the input trajectory. More precisely this allows us to
+regard the reservoir as implementing a ﬁlter of the input tra-
+jectory (e.g.
+it modiﬁes the projection on a certain Hilbert
+space). In this sense, reservoir computers can be thought of as
+approximating ﬁlters, in much the same that neural networks
+may be considered as approximating functions [19, 20].
+In addition to the input trajectory u, we are also provided
+with an output trajectory z . We assume this output trajectory is
+generated by some (typically complicated and nonlinear) func-
+tion of the input trajectory u, and so sometimes write it as z [u].
+The goal of reservoir computing is to learn to approximate the
+input-output mapping u (cid:55)→ z [u] with an estimate ˆz [u], which
+is deﬁned as a linear combination of the reservoir’s variables,
+ˆz [u](t) = (cid:126)wT (cid:126)x[u](t). This is displayed schematically in ﬁg-
+ure 1, with variable names referring to the relevant quantities
+in electronic circuits. To the reservoir trajectories (cid:126)x we typi-
+cally append the a constant signal, (cid:126)x(cid:48) (t) := [(cid:126)x(t), (cid:126)1(t)] as is
+common practice in RC.
+While the reservoir is typically a large and recurrently con-
+nected dynamical system, the interesting feature of RC is that
+only the output layer, given by the coeﬃcients (cid:126)w , is trained.
+Training is performed in the following manner. First, the reser-
+voir is “initialized” by driving with the input signal on an in-
+terval [−T (cid:48) , 0], until the fading memory property ensures that
+its state is independent of the initial condition at t = −T (cid:48) . The
+reservoir is then driven for an additional interval [0, T ]. The
+coeﬃcients (cid:126)w are learned via linear regression, by minimiz-
+ing the mean squared error (MSE) between a reconstruction
+ˆz (t) = (cid:126)wT (cid:126)x(cid:48) (t) and the provided output trajectory z (t) over
+the time interval [0, T ],
+(cid:90) T
+0
+In the next section we make these notions more precise. We
+provide a formal development of reservoir computing, elec-
+tronic reservoirs and memristors, as well as deﬁnitions of the
+measures of computational capacity we will utilize. We then
+turn to the feasibility, tunability and scalability of LRC and
+memristor-based reservoirs. Finally, we compare our results
+to more conventional ESN reservoirs [1], showing that elec-
+tronic reservoirs are capable of matching or exceeding the
+performance of a standard ESN reservoir implementations.
+BACKGROUND
+Reservoir Computing
+Reservoir computing is a machine learning technique for ap-
+proximating a mapping between two sequences or functions.
+In what follows, we present a brief review of reservoir com-
+puting in continuous time, assuming scalar-valued input and
+output functions. The translation to discrete time and vector-
+valued inputs/outputs is straightforward.
+Formally, a reservoir combines a multivariate dynamical
+system with a simple learning algorithm. At time t, the state
+of the dynamical system, which we indicate as (cid:126)x(t), is driven
+by an input u(t) and obeys the diﬀerential equation
+˙(cid:126)x(t) = F ((cid:126)x(t), (cid:126)u(t)).
+(1)
+As a result of these dynamics, the state of the reservoir encodes
+information both about its previous history and (possibly non-
+linear) transformations of the input. As an important example,
+a linear reservoir is governed by the equation
+˙(cid:126)x(t) = A(cid:126)x(t) + (cid:126)u(t).
+(2)
+MSET [z , (cid:126)w] =
+1
+T
+dt (z (t) − (cid:126)wT (cid:126)x(cid:48) (t))2 .
+(3)
+In the following, we will choose (cid:126)u(t) = (cid:126)vu(t), where (cid:126)v is
+a vector which deﬁnes how the input signal u(t) enters into
+each neuron (or in general memory element). In order for a
+dynamical system to be considered feasible as a reservoir, its
+state must approach a function of the input trajectory. At a high
+level, we can state this requirement in terms of two conditions:
+This optimization problem ˆ(cid:126)w = argmin (cid:126)w MSET [z , (cid:126)w] has
+a closed form solution ˆ(cid:126)w = ((cid:126)x(cid:48)T (cid:126)x(cid:48) )−1(cid:126)x(cid:48) zT , with the resulting
+approximation ˆz (t) = ˆ(cid:126)wT (cid:126)x(cid:48) (t) being the projection of z (t)
+onto the span of the reservoir trajectories. Regularization via
+ridge regression is also commonly employed in practice, which
+modiﬁes the objective to MSET [z , (cid:126)w] + k || (cid:126)w||2 .
+0
+• Fading Memory: If the system were to be started from
+two diﬀerent initial conditions (cid:126)x0 , (cid:54)= (cid:126)x(cid:48)
+and driven
+with the same input trajectory u, the system’s trajec-
+tories should eventually converge to the same state,
+(cid:126)x(t), (cid:126)x(cid:48) (t) → (cid:126)x[u](t) as t → ∞. The statement above
+implies that the system has a ﬁnite temporal memory.
+• State Separation: Diﬀerent input sequences should drive
+the system into diﬀerent trajectories, i.e., if the same
+initial condition were to be driven with two diﬀerent
+input trajectories u (cid:54)= u(cid:48) , the state of the system is
+reﬂected in the diﬀerence at long times. Mathematically,
+here we use the local-time notion, e.g. that (cid:107)(cid:126)x[u](t) −
+(cid:126)x[u(cid:48) ](t)(cid:107) > 0 ∀t > 0.
+The ﬁrst condition is analogous to requiring that the state of
+the reservoir becomes a function of the input trajectory, while
+The Computational Capacity of Continuous Time Reservoirs
+A framework for deﬁning and assessing the computational
+capacity of reservoirs was developed by Dambre et al. [21] in
+the context of discrete time reservoirs. Here we deal with its
+extension to continuous time reservoirs [22].
+The goal of RC is to approximate the function u (cid:55)→ z [u],
+rather than simply the value of this function z (t) on the train-
+ing interval t ∈ [0, T ]. In order to distinguish the trajectories,
+one has to deﬁne a notion of distance between reservoir trajec-
+tories (cid:126)x[u] and the output function z [u], which we do by em-
+ploying an appropriate Hilbert space on the set of trajectories.
+Within such Hilbert space, Dambre et al. introduce the subset
+of trajectories called “fading memory Hilbert space”, which
+contains functions that possess the fading memory property
+3
+Figure 1. Scheme of an electronic reservoir. The input u(t) for an electronic reservoir is a voltage, internal states (cid:126)x(t) are given by dynamical
+resistive states R(t) ( or internal memory states m(t) which deﬁne the resistance for a memristor), voltages u(t) or charge q(t). The reservoir
+we propose has various modules with a diﬀerent role, and memristors are introduced for nonlinear learning tasks. Speciﬁcally, we propose
+modules which include LRC circuits (top right), polar memristor circuits (top left), apolar memristive circuits (bottom left) and memristive
+networks (bottom right). As we will see, simple apolar memristive circuits have similar computational property of memristive networks.
+(cid:2) (cid:82) ∞
+0 z [u](t)z (cid:48) [u](t)dt(cid:3), where
+discussed above (i.e., they depend only on the recent history
+of the input).
+The inner product on the space of trajectories is constructed
+by deﬁning a measure over inputs u as well as an associated
+inner product as (cid:104)z , z (cid:48) (cid:105) = Eu
+Eu indicates expectation over the measure. For a reservoir that
+satisﬁes our notion of feasibility, the state trajectories will be
+elements of this Hilbert space. In practice, ergodicity may be
+leveraged to compute inner products in terms of time averages
+of reservoir trajectories, rather than over the measure over u.
+Thus, by introducing a random input signal and averaging over
+suﬃciently long times we can regard our results as measuring
+properties of the reservoir rather than the particular time in-
+terval used for training. We also inherit the linear structure
+of the Hilbert space with notions or orthogonality, dimension
+and distance.
+Measures of Capacity
+We are interested in the estimator that minimizes the MSE
+of eqn.
+(3) for some target output z . Following Dambre
+et al. [21], we deﬁne the memory capacity of the dynamical
+system to approximate z as
+CT [z ] = 1 − min (cid:126)w MSET [z , (cid:126)w]
+(cid:104)z 2 (cid:105)T
+,
+(4)
+(cid:82) T
+0 dt f (t).
+T
+0 ≤ CT [z ] ≤ 1.
+where (cid:104)f (cid:105)T = 1
+The capacity is bounded
+In what follows, in addition to the mem-
+ory capacity CT [z ], we will also reference the normalized
+mean-squared error of the estimate, nMSET [z ] = 1 − CT [z ].
+An immediate consequence of the above deﬁnitions is that,
+when evaluated on a complete set of orthogonal functions and
+in the long time limit, the sum of capacities will tend towards
+the number of linearly independent trajectories in the reservoir,
+i.e., the size of the span of the reservoir trajectories. Since an
+approximation can only be accurate when z [u] is close to the
+span of the reservoir, the number of linearly independent tra-
+jectories in the reservoir puts a strong constraint on the possible
+eﬀectiveness of the reservoir. As shown numerically in [21],
+there is in fact a tradeoﬀ between the linear memory capac-
+ity of a reservoir, and the amount of nonlinear reconstruction
+ability[23]. For this reason, it is possible to tune the system
+towards one or the other feature.
+By evaluating CT [z ] for diﬀerent choices of z , one can quan-
+tify the capacity of the reservoir to perform diﬀerent kinds of
+computations. For example, when z is a linear function of
+the input u, CT [z ] will quantify capacity to perform linear
+computations, and when z is a nonlinear function of the input
+u, CT [z ] will quantify capacity to perform nonlinear compu-
+tations. Given this, we note two points that will guide our
+development of electronic reservoirs: (1) A reservoir must be
+tunable, by which we mean that it can be designed so as to
+achieve high CT [z ] for diﬀerent desired choices of z . For
+echo state networks, various rules of thumb for tuning their
+performance have been developed; we will present analogous
+methods for obtaining high values of speciﬁc CT [z ] in elec-
+tronic networks; (2) Based on these capacities, we can build a
+measure of total memory capacity (see τ below) which should
+scale with the size of the reservoir. The success of RC draws
+from the ability to use very large reservoirs. If electronic reser-
+voirs are to be useful, increasing the size of the reservoir must
+improve its performance on the type of capacities we chose in
+(1). Optimal scaling is extensive in the system size. In what
+follows we develop measures of capacity for diﬀerent kinds of
+z that we will be interested in.
+The memory capacity CT [z ] generalizes several com-
+mon measures of reservoir performance. For example, the
+previously-proposed “memory function” m(τ ) [2, 22, 24] cap-
+tures the reservoir’s capacity to reconstruct linear functions of
+the input at time lag τ . By deﬁning the time-lagged input
+trajectory uτ (t) = u(t − τ ), we can write in terms of the
+memory capacity as m(τ ) = CT [uτ ]. This oﬀers a natu-
+ral generalization to nonlinear functions mn (τ1 , . . . , τn ) =
+CT [uτ1 · uτ2 . . . uτn ] which measures the reservoir’s capacity
+to produce products of the input function taken at previous
+times τ1 , . . . τn .
+We introduce a measure of the total linear memory capacity
+of the network,
+(cid:90) ∞
+0
+τ =
+dτ Θ(m(τ ) > 1 − ),
+(5)
+where Θ is the Heaviside step function, which we refer to as
+the linear memory capacity of the dynamical system. This
+quantity captures the time delay at which the history of the
+input is reconstructed with an error less than . This deﬁnition
+can be generalized to quantify the total nonlinear memory
+capacity as
+(cid:90) ∞
+(cid:90) ∞
+τ (n)
+ =
+· · ·
+dτ1 · · · dτn Θ(mn (τ1 , . . . , τn ) > 1 − ).
+0
+0
+(6)
+In [24], a discrete time linear reservoir is presented with a τ0.5 -
+memory length that scales extensively with the system size.
+This is translated to continuous time in [22] using a diﬀerent
+measure of total capacity. In this work we present an electronic
+implementation of the linear reservoirs discussed in those pa-
+pers, alongside an implementation which includes nonlinear
+components.We then generalize this approach by designing
+an electronic reservoir which displays extensive scaling in its
+quadratic-memory capacity τ (2)
+.
+
+Circuit Elements and Structure
+We consider circuits composed of traditional linear elements
+including inductors (L), capacitors (C), and resistors (R), ac-
+tive elements (voltage or current sources), as well as passive
+memory elements known as memristors (Mem) (see below).
+In all cases, the electronic reservoir will accept a vector input
+through a set of voltage sources (cid:126)s. We can convert the scalar
+input u(t) to a time dependent voltage vector through a set of
+input weights (cid:126)s = (cid:126)vu(t).
+The linear reservoirs we consider will be composed of sets
+of LRC subcircuits as shown in ﬁgure 1 (d) in which each
+LRC circuit, indexed by n has component values ln , rn , cn
+and is driven by a voltage generator sn = u(t) (taking (cid:126)v = (cid:126)1).
+Each circuit possesses two degrees of freedom qn (t), ˙qn (t)
+corresponding to the charge across and current entering the
+capacitor, which follow equations of motion,
+(cid:21)
+(cid:20) ˙qn (t)
+¨qn (t)
+(cid:20) 0
+=
+− 1
+ln cn
+I
+− rn
+ln
+(cid:21)
+(cid:21) (cid:20)qn (t)
+˙qn (t)
+(cid:20) 0
+(cid:21)
++
+sn (t)
+ln
+.
+(7)
+4
+The output trajectories of an LRC are the trajectories of the
+internal degrees of freedom, (cid:126)x = [(cid:126)q(t), ˙(cid:126)q(t)] (the vector nota-
+tion covers the indexing over n). The dimension of an LRC
+reservoir of N subcircuits is thus 2N .
+In addition to the linear electronic reservoirs described
+above, we consider reservoirs of nonlinear electronic com-
+ponents called memristors. Memristors are passive 2-terminal
+devices characterized by the current-input response relation-
+ship,
+V (t) = R(η)I (t),
+˙η(t) = f (η(t), I (t)),
+(8)
+(9)
+where V (t) is the voltage drop across the memristor, I (t) is
+current, η(t) is the internal state of the memristor, and R(η(t))
+is the state-dependent resistance. It can be seen that the re-
+sistance can depend on the past history of the current.
+Im-
+portantly, memristors are inherently nonlinear elements. We
+will consider several circuit structures as shown in ﬁgure 1,
+including single memristor circuits (a), paired memristor cir-
+cuits (b) and memristor networks (c). As in the case of linear
+networks, the input to the circuits is through a set of voltage
+generators (cid:126)s(t) = (cid:126)vu(t) where (cid:126)v is a vector of weights with
+units of voltage.
+The internal states of a memristor circuit closely mimic the
+behavior of a neural network. We constrain ourselves to the
+linear current model similar to the one proposed in [9], along
+with a decay term [25],
+(cid:16)
+R(η) = Roﬀ (1 − η) + Ron η ,
+R(η) = Roﬀ (1 − χη)
+˙η = −αη +
+1
+β
+I (t).
+χ :=
+Roﬀ − Ron
+Roﬀ
+(cid:17)
+,
+(10)
+(11)
+(12)
+[Ron , Roﬀ ].
+Here the constant α = 1/t∗ is an inverse time scale while β
+is an activation current per unit of time, which moderates the
+strength of the input signal. Thus, I (t) = V (t)/R(η(t)). We
+see that for α = 0, η(t) is proportional to the total charge
+accumulated in the conductor. We limit η to the interval
+[0, 1], so the resistance R(η) varies between two limiting values
+The various circuit structures in ﬁgure 1 may be cast in a
+universal form by introducing the cycle space projector ΩA
+[25] which projects onto current conﬁgurations that satisfy
+Kirchhoﬀ’s current law. The projector ΩA can be simply
+computed from the circuit graph G .
+in which nodes of the
+graph n ∈ G represent electrical junctures between the edges
+that contain electrical elements. For a circuit in which the
+edges contain a voltage generator in series to a memristor, as
+in ﬁgure 1 (c), the equation of motion is given by [25]
+˙(cid:126)η(t) = −α(cid:126)η(t) +
+1
+β
+(I − χΩAH (t))−1ΩA(cid:126)s
+(13)
+where we have used the convention H (t) = diag (cid:126)η(t). Inter-
+actions between memristors thus occur through the inverse of
+I − χΩAH (t) and are mediated both by χ and the Kirchhoﬀ
+laws imposed by ΩA . A memristor circuit generates reservoir
+trajectories vecx = [(cid:126)η(t)] which are used to train the output.
+(cid:90) ∞
+RESULTS
+Linear Electronic Reservoirs
+In this section we illustrate the notions of capacity and scal-
+ing introduced above in the more familiar realm of linear cir-
+cuits. In the following, we show that electronic reservoirs with
+extensive memory capacity may be constructed from LRC cir-
+cuit components and that these devices may be understood
+as constructing the Fourier representations of linear kernels.
+Moreover, in the Materials and Methods, we prove the follow-
+ing result.
+Feasibility of LRC circuits. Reservoirs of separate LRC
+circuits (as described in the following) satisfy the fading mem-
+ory and state separability properties.
+This justiﬁes our use of these systems as reservoirs and the
+application of the capacity measures above. For the linear
+reservoir in eqn. (2), the long time limit solution is
+(cid:126)x(t) =
+dτ eAτ (cid:126)vu(t − τ ),
+(14)
+0
+from which we see that linear reservoirs may be used to ap-
+proximate linear functions of the input signal, and that their
+properties will depend on the eigenvalues of A. A natural
+measure in which to demonstrate extensive scaling is thus the
+memory capacity τn . In [22, 24] it was noted that an extensive
+memory capacity was obtained for reservoirs with eigenvalues
+lying on a vertical line in the negative half plane, i.e., eigen-
+values of the form λn,± = −γ ± in∆ω for n ∈ {0 . . . N }.
+The resulting trajectories of the system can be implementing a
+truncated Fourier transform with cut-oﬀ ωc = N ∆ω and base
+frequency ∆ω . The exponential window, e−γ τ indicates that
+this will be successful for an interval 0 ≤ τ ≤ 1/γ and that
+the base frequency ∆ω should be on the same order as γ .
+A series LRC circuit expressed as a linear system has eigen-
+values λ± = − r
+4l2 = −γ ± iω and a corre-
+sponding pair of trajectories qn (t), ˙qn (t) corresponding to the
+charge and current entering the capacitor (see Materials and
+Methods). As a consequence any eigenvalue spectrum in the
+negative half-plane and symmetric in the upper and lower half
+planes can be achieved by a collection of LRC circuits with a
+particular choice of the component values ln , rn , cn , as in Fig.
+1 (d). Given a γ and ∆ω , we choose ln = 1, rn = 2γ for all
+n and
+(cid:113) 1
+lc − r2
+2l ± i
+cn =
+1
+n2∆ω2 + γ 2
+(15)
+in which case we have that the resulting LRC circuits have
+eigenvalues λn,± = −γ ± in∆ω .
+Recalling a particular memory, zτ (t) = u(t − τ ) is thus
+equivalent to constructing an approximate representation of
+the delta function δ(t − τ ). After ﬁtting, the learned weights
+and wc may be used to construct the ‘kernel’ of the
+, w ˙qn
+wqn
+reservoir. Speciﬁcally, we can write the predicted output as
+(wqn qn (t) + w ˙qn ˙qn (t)) + wc
+dτ K (τ )u(t − τ ) + wc .
+ˆz (t) =
+=
+N(cid:88)
+(cid:90) ∞
+n=1
+0
+N(cid:88)
+(cid:104)
+5
+(16)
+(17)
+(18)
+,
+where K indicates the kernel function,
+K (τ ) = e−γ τ
+w ˙qn
+(cid:0)n∆ω cos(n∆ωτ ) − γ sin(n∆ωτ )(cid:1)(cid:105)
+1
+lnn∆ω
+wqn sin(n∆ωτ )+
+n=1
+which gives an explicit representation of the network’s ap-
+proximation to δ(t − τ ). In Figure 2, we display the memory
+function, kernel and reconstruction for an LRC circuit reser-
+voir with γ = 0.12, ∆ω = 0.7γ and 71 subcircuits (motifs)
+corresponding to an cutoﬀ frequency of N ∆ω = 6H z . We
+can see that the memory function can reconstruct the signal
+with a fairly long delay.
+To construct an LRC network of N circuits, we identify a
+maximum frequency ωmax associated with our signal and de-
+ﬁne ∆ω = ωmax/N as the lowest frequency and resolution.
+This lowest frequency deﬁnes a timescale t∗ ∼ 1/∆ω over
+which a periodic signal could be represented by the Fourier
+series. We then choose γ =
+2∆ω to suppress the signal for
+times longer than t∗ . From this we expect, if ωmax is cho-
+sen suﬃciently large to accurately represent the signal, that
+the system’s linear memory capacity τ will scale as N . This
+is conﬁrmed in ﬁgure 3, where we show the linear memory
+capacity τ for  = 0.1 across a range of reservoir sizes. As
+expected, reservoirs of this type show an extensive linear mem-
+ory capacity. Note that the precise value of  is unimportant
+since, as shown in ﬁgure 2, the memory function for these
+networks maintains a value near 1 before falling sharply.
+√
+MEMRISTOR RESERVOIRS
+We now turn to establishing analogous results for memristor
+reservoirs. To begin, in the Materials and Methods we prove
+the following results:
+Feasibility of Memristor Networks. Reservoirs of net-
+worked memristors satisfy the fading memory and state sepa-
+rability properties for suﬃciently small input signal.
+In memristor networks, fading memory is a consequence of
+the decay term −αx in the equations of motion, eqn.
+(12),
+which represents the volatility of the conductive state. Some
+degree of volatility is thus an asset to memristors employed in
+RC.
+Having established feasibility we now turn to the speciﬁc
+functional forms of the memristor trajectories. Generalizing
+the representation of linear systems in eqn. (14), functions in
+the fading memory Hilbert space have a representation as a
+6
+Figure 2. The (linear) memory function m(τ ) (upper left), kernel (upper right) and reconstruction (lower) for an LRC circuit reservoir with
+γ = 0.12, ∆ω = 0.7γ and 71 elements corresponding to an cutoﬀ frequency of N ∆ω = 6H z . The memory function maintains a value above
+0.99 up to a delay of 55.5. The kernel is calculated from the analytical solution of the network and ﬁtted weights. This ﬁgure shows that the
+LRC reservoir takes advantage of its Fourier modes to construct a sinc approximation to the δ function. The bottom panel displays the resulting
+reconstruction at τ = 20. For this delay, the reconstruction obeys m(τ ) = 0.9983.
+has the Volterra series expansion
+(cid:90) ∞
+(cid:90) ∞
+0
+dτ1
+η(t) =
+1
+β
+(cid:90) ∞
+χ
+β 2
+dτ1 e−ατ1 u(t − τ1 )+
+dτ2 e−ατ2 u(t − τ1 )u(t − τ2 ) + O(χ2 ),
+0
+τ1
+(20)
+(see Materials and Methods), where we have neglected bound-
+ary eﬀects and where higher order kernels of the input are
+suppressed by higher powers of χ. We immediately note that
+the kernel functions tend to be exponentially decaying at a rate
+determined by α, consistent with the fading memory property
+and the fact that memristor trajectories depend on arbitrarily
+high powers of the driving signal u(t). In this sense, memris-
+tors may be considered as a source of nonlinearity in electronic
+reservoirs.
+Given our notion of tunability, we wish to demonstrate how
+to design memristor reservoirs for particular computational
+problems, i.e. a particular choice of z . As a generalization of
+the linear case, we consider the approximation of an arbitrary
+2nd order ﬁlter with support on the previous time interval
+[0, T ∗ ]. More speciﬁcally, we wish to approximate a function
+of the input with the form,
+z [u](t) =
+dτ1 F1 (τ1 )u(t − τ1 )+
+(cid:90) T ∗
+(cid:90) T ∗
+0
+(cid:90) T ∗
+dτ1
+dτ2 F2 (τ1 , τ2 )u(t − τ1 )u(t − τ2 ).
+0
+0
+Approximating this function with memristors requires isolat-
+ing terms related to the second order contribution to the trajec-
+tory. In this interest we note that considering a reservoir of two
+Figure 3. The extensive scaling of the linear memory capacity τ0.1
+with the number of trajectories generated in an LRC reservoir. The
+construction of the reservoirs, detailed in the main text and Materials
+and Methods, corresponds to ωmax = 4 Hz. Errors are shown as
+vertical bars.
+Wiener/Volterra series [26],
+(cid:90) ∞
+(cid:90) ∞
+0
+z [u](t) =
++
+dτ1 h1 (τ1 )u(t − τ1 )
+dτ1dτ2 h2 (τ1 , τ2 )u(t − τ1 )u(t − τ2 ) + · · ·
+0
+(19)
+which decomposes the function into linear and progressively
+higher order nonlinear components governed by kernel func-
+tions hn (τ1 , . . . τn ).
+The trajectory of a single memristor governed by eqn. (12)
+memristors η+ (t) and η− (t) each driven by u(t) and −u(t)
+respectively, allows us to construct their sum (away from the
+boundaries and up to terms of order O(χ2 )) as
+(cid:90) ∞
+(cid:90) ∞
+η± (t) ≈ 2χ
+β 2
+dτ1
+0
+τ1
+dτ2 e−ατ2 u(t − τ1 )u(t − τ2 )
+u(t).
+where η± (t) = η+ (t) + η− (t), which cancels all odd terms in
+Due to the exponential decay with time of terms in the
+Wiener/Volterra series, we expect the system to only be able
+to construct nonlinear functions of the input over a relatively
+short time delay. A decreased value of α will integrate a longer
+window of the previous history into the current state, but will
+also lead to lower capacity due to interference from previous
+memories. As in the case of the LRC circuit, it is essential
+to vary the parameters of the circuits to generate linearly in-
+dependent trajectories. This may be accomplished by varying
+α and β (the timescales of decay/excitation for memristors),
+by varying the amplitude of the driving, or by introducing dis-
+order into the structure of the circuit ΩA . Here we focus on
+what we view as the most practical option, which is varying
+the amplitude of the driving signal. In networks, memristors
+are driven with a proximal voltage generator that varies in am-
+plitude from +C to −C in equally spaced increments, where
+C is a constant that may be tuned.
+In Figure 4 we provide comparisons between reservoirs
+composed of LRC, Single Memristors, Paired Memristors and
+Memristor networks. While on the one hand the LRC circuit
+is able to reconstruct only linear transformations of the input,
+memristive networks have only a limited advantage over paired
+disconnected memristor motifs.
+While memristor reservoirs give us the ability to calculate
+quadratic functions of the input with high accuracy for short
+times, the quadratic memory capacity τ (2)
+does not scale ex-
+tensively as the size of the reservoir is increased. This can be
+seen from the fact that the memristor network reservoirs, which
+is 28 times bigger than the “paired memristors” reservoir, has
+a similar quadratic memory capacity. In the next section we
+consider hybrid reservoirs of memristor and LRC components
+which do demonstrate this scaling.
+
+Hybrid Deep Reservoirs
+The properties of LRC and memristor reservoirs may be
+combined to improve the scaling of the nonlinear capacities
+of interest. The reservoir structure we will examine uses the
+trajectories of a “surface layer” reservoir (cid:126)xs (t) where voltage
+generators are driven by the input, (cid:126)ss = (cid:126)vu(t), to drive another
+“deep layer” reservoir (cid:126)xd [27]. The deep layer voltage gener-
+ators are driven by the surface layer trajectories as (cid:126)sd = C (cid:126)xs
+where C is a matrix of coupling coeﬃcients whose structure is
+discussed below. As LRC and memristor components are kept
+in separate layers, these deep reservoirs inherit the feasibility
+properties of their sub-components. The training procedure
+uses all trajectories (cid:126)x = [(cid:126)xs , (cid:126)xd ] in the regression.
+As seen in Figure 4, the ability of memristors to calculate
+quadratic functions of the input occurs only over a brief time.
+7
+[(cid:126)q+ (t), ˙(cid:126)q+ (t), (cid:126)q+ (t), ˙(cid:126)q+ (t)]. As such, C is a 40 × 2 matrix
+The results above would suggest that using a surface layer
+memristor network to drive a deep layer LRC reservoir would
+yield a substantial improvement of the interval over which the
+reservoir could yield a successful quadratic reconstruction.
+In ﬁgure 5, the top panel shows the result of using a pair of
+memristors conﬁgured as in the section above, to drive an LRC
+reservoir. Each memristor trajectory (cid:126)xs = [η+ (t), η− (t)]
+is used as a source signal for a small LRC reservoir of 10
+circuits with γ = 0.4, ∆ω = 0.4 corresponding to a cutoﬀ
+frequency of 4 H z to produce additional trajectories (cid:126)xd =
+in which the ﬁrst 20 rows were [1, 0] and the subsequent 20
+[0, 1] The resulting reservoir trajectories are used to evaluate
+the quadratic memory function m2 with the results showing a
+substantial increase in the systems computational capacity for
+‘equal-time’ quadratic reconstructions (deﬁned via m2 (τ , τ )).
+As the deep LRC reservoir is used to recall the equal-time
+products computed by the memristor reservoir, we expect that
+measures of their total quadratic capacity τ (2)
+ will also scale
+extensively. However increasing the reservoir size will not
+improve the reconstruction of unequal-time products.
+We may similarly consider the eﬀect of using a surface layer
+LRC reservoir to drive a deep layer memristor reservoir. In
+this case, products of the Fourier modes stored in the LRC
+network state will be computed by the memristor network, of-
+fering something akin to a 2-dimensional Fourier transform in
+τ1 and τ2 . We thus suspect the resulting network will display
+an improved unequal-time quadratic memory function. To ac-
+complish this, we have implemented a the same 10 circuit LRC
+reservoir as described above driven with the input signal. The
+resulting 20 trajectories are coupled to a set of memristor pairs
+such that the sum and diﬀerence of every pair of the 20 LRC
+trajectories are used to drive an independent pair of memristors
+(the structure of the coupling matrix C is given in the supple-
+mental information). The resulting 2 × 20 × 19 + 20 = 780
+trajectories are used to train the reservoir. In the lower panel
+of ﬁgure 5 we have implemented this to calculate the quadratic
+memory function. We observe a substantial improvement in
+the reservoir’s ability to construct unequal-time products of
+the input signal although this requires an increase in the size
+of the reservoir. Such an increase is expected, as the number
+of unequal-time products with τ1 , τ2 < T scales quadratically
+in the maximum delay T . In ﬁgure 6 we show the scaling of
+with the size of the reservoir. The total quadratic capacity
+indeed scales linearly with the size of the reservoir indicating
+that arbitrary unequal-time products may be reconstructed by
+a suﬃciently large reservoir. We emphasize that it is the non-
+linear memory capacity τ (2)
+that can scale extensively with
+the system size; increasing the maximum delay T under which
+we can reconstruct products of the input will require that the
+reservoir size scale as T 2 .
+A natural further architecture to consider would be to use
+memristor reservoirs as both surface and deep layers, as has
+been considered in works based on the simulation of these
+devices. Given the discussion above, we expect the primary
+beneﬁt of this architecture is to enhance higher order nonlinear
+capacities which is precisely what we observe in simulation.
+τ (2)
+0.1
+
+8
+Figure 4. The quadratic memory function m2 (τ2 , τ2 ) for LRC circuits (left), a single (middle left) and opposed pair (middle right) of memristors
+and a triangular lattice of memristors (right). This measures the reservoirs ability to approximate the function z (t) = u(t − τ1 )u(t − τ2 ). We
+deﬁne τ ∗ := argmax
+τ m2 (τ , τ ), which corresponds to the optimal delay for an equal time reconstruction; the insets show the corresponding
+reconstruction ˆz (orange) and target output z (t) = [u(t − τ ∗ )]2 (blue) as a function of the input signal u(t − τ ∗ ). As expected, the LRC
+circuit, as in Fig. 1 (d) is only capable of generating linear approximations of the output. A single memristor reservoir, as in Fig. 1 (a) is unable
+to isolate its quadratic component and misses negative parts of the reconstruction due to boundary eﬀects (middle left inset). The addition of
+another memristor with opposite bias, as in Fig. 1 (b), signiﬁcantly increases the ability to reconstruct z . The memristor network, Fig. 1 (c),
+shows an enhanced ability to reconstruct z and clear nonlinearity (right inset). The nonlinear memory function value of m2 (τ ∗ , τ ∗ ) for each
+network was 0.390 (LRC), 0.558 (single memristor), 0.960 (paired memristors), and 0.995 (memristor network).
+However, as this is outside the scope of the computational task
+we set out to achieve, we do not include results from such
+networks here.
+Comparison with Echo State Networks
+To assess the performance of these electronic reservoirs
+against standard reservoirs, we construct a ﬁtting task in which
+we must approximate a known function of the input signal. We
+construct a member of the fading memory Hilbert space as
+(cid:90) 10
+(cid:90) 10
+0
+0
+(cid:90) 10
+0
+z [u](t) =
+dτ K1 (τ )u(t − τ )+
+dτ2K2 (τ1 , τ2 )u(t − τ1 )u(t − τ2 )
+dτ1
+K2 (τ1 , τ2 ) = −e−0.3τ cos (cid:0)2(τ1 − τ2 )(cid:1)
+K1 (τ ) = e−0.5τ cos(2τ )
+(21)
+(22)
+(23)
+the accurate approximation of which requires a mixture of
+memory and nonlinearity.
+To approximate this, we apply an implementation of con-
+tinuous time Echo State Network (ESN) for comparison. An
+ESN is a dynamical reservoir in which the internal states evolve
+according to
+˙(cid:126)x = −α(cid:126)x(t) + tanh(M (cid:126)x(t) + (cid:126)u(t)),
+(24)
+where α here is a leakage similar to the one of the memristor
+devices we consider, while tanh(·) applies to every neuron; M
+is a matrix that in order to satisfy the fading property must have
+maximum eigenvalue less than one; (cid:126)u scales the magnitude of
+the input u(t) as it drives each neuron.
+We compare the results of a tuned ESN to a “naive” memris-
+tor network analogous to those employed in previous literature,
+Table I. Comparison of reservoir performance on the quadratic ﬁlter-
+ing task described in the main text.
+Reservoir
+‘Naive’ Memristor Network
+ESN
+LRC→Memristor
+800
+0.1(8)
+780 0.02(0))
+780 0.01(4)
+dim((cid:126)x) nMSE Gen. nMSE
+(2).
+0.03(6)
+0.01(8)
+and a hybrid LRC to memristor reservoir. As far as possible,
+each reservoir was conﬁgured to produce the same number of
+trajectories.
+The “naive” memristor network is a 17×17 triangular lattice
+with 800 edges each containing a memristor (α = 3, β = 1,
+χ = 0.8) and voltage generator. The driving input was varied
+on the interval [−1, −0.1]∪ [0.1, 1] (see Materials and Methods
+for further information). The LRC→Memristor reservoir was
+conﬁgured identically to that presented above included a total
+of 780 trajectories. Finally the ESN consisting of 780 elements
+was run and tuned following the recommendations in [3] (see
+Materials and Methods).
+We report both the training error, calculated on an in-
+put output pair on [100, 4000] and a measure of generaliza-
+tion error, using the trained weights to reconstruct the output
+on [4000, 5000] (see Materials and Methods). The hybrid
+LRC→Memristor reservoir demonstrates a 10-fold improve-
+ment over the ‘naive’ memristor network and performs on par
+with the ESN implementation in training as well as a 2-fold
+improvement in generalization error. Suitably crafted analog
+reservoirs are thus capable of matching and even surpassing
+the performance of standard reservoirs.
+9
+Figure 6. The scaling of the quadratic memory capacity with reser-
+voir size in the hybrid LRC to Memristor reservoir. LRC reservoirs
+ranging from 10 to 18 subcircuits were used to drive a memristor
+reservoir as described in the main text, resulting in reservoirs ranging
+from 946 to 2556 internal degrees of freedom. The quadratic memory
+capacity τ (2)
+(and errorbars) were estimated from a ﬁnite size scaling
+analysis as detailed in the Materials and Methods.
+0.1
+designed appropriately for a given problem.
+In memristor reservoirs we have shown that while the system
+contains contributions from terms of very high order, these are
+moderated in strength by powers of χ.
+It is essential that
+the reservoir be able to isolate desired terms to make use of
+them in the training process; we have shown that using paired
+memristors of opposite polarity gives a substantial increase in
+the reservoir’s ability to isolate their quadratic kernels.
+Combining LRC and memristor networks into deep reser-
+voirs allows the utilization of the memory capabilities of LRC
+reservoirs and the nonlinear capacities of memristor reservoirs
+in order to obtain speciﬁc computational capacities. Utilizing
+an LRC network as a deep layer allows nonlinear computations
+performed in the surface memristor network to be stored for
+long times. Similarly, using an LRC reservoir as the surface
+layer driving a deep layer memristor network will calculate
+products of Fourier modes and give enhanced unequal time
+quadratic capacities. Most importantly, this leads to a total
+quadratic capacity which scales linearly with the system size
+such that arbitrary products of the input can be constructed by
+a suﬃciently large reservoir.
+This analysis can have substantial impacts on performance,
+as we show in our comparison to ESN reservoirs. The hybrid
+reservoirs we present give a 10-fold improvement over the
+naive memristor network implementation, and perform on par
+with the ESN implementation. Properly constructed electronic
+reservoirs should thus be capable of matching the performance
+of standard reservoirs but also open the use of larger reservoirs
+and faster computation times.
+The approach we take to the analysis of the computational
+capacities of memristor and LRC reservoirs may be general-
+ized to higher order kernels of the network and other nonlinear
+elements.
+In this sense we attempt to present a general ap-
+proach to the understanding of physical reservoirs in analogy
+to the methods available to tune ESNs by trading between
+memory storage and nonlinearity.
+Figure 5.
+The quadratic memory function m2 (τ1 , τ2 ) for hybrid
+memristor-LRC reservoirs. The top panel shows the result of using a
+driven pair of memristors to drive an LRC reservoir. The LRC reser-
+voir stores memory of the nonlinear computation in the memristor
+network, leading to large equal time quadratic capacities. In the lower
+panel, the result of using an LRC reservoir to drive a set of memristor
+pairs is shown. The memristor pairs compute products of the Fourier
+modes generated in the LRC network, approximately implementing
+a 2-dimensional Fourier transform, though this is eﬀective only for
+short times.
+DISCUSSION
+Despite wide interest in the possibility of utilizing electrical
+circuits with memory as the basis for hardware reservoirs, an
+understanding of how these systems process and store infor-
+mation has been lacking. While for echo state networks, the
+balance between memory and nonlinearity is controlled pri-
+marily by the spectral radius of the coupling matrix, no similar
+conditions have been explored for electrical networks.
+In this work we have shown that linear electronic reservoirs
+of LRC circuits can be constructed with optimal memory prop-
+erties, having an eigenvalue spectrum known to correspond to
+an extensive memory (e.g. that scales linearly with the number
+of components). We have shown that this may be interpreted
+as performing a Fourier transform of the driving signal in
+hardware and that the eigenvalue spectrum required can be
+The ability to design eﬀective reservoirs
+for
+low-
+dimensional tasks implies their eﬀectiveness on high dimen-
+sional tasks such as ﬂuid dynamics and spatiotemporal chaos
+through parallelization [6]. Designing ﬂexible co-processors
+consisting of networks of low-dimensional reservoirs, similar
+to those presented here, will require a careful understanding
+of their computation properties and how to modify them to
+the task at hand. This work ﬁlls a gap in this understanding,
+allowing for tuneable electronic reservoirs to be implemented
+in hardware.
+10
+MATERIALS AND METHODS
+t < 0, we have
+Input signals
+In order to construct an ensemble of input signals with a
+speciﬁed autocorrelation length we consider a delta-correlated
+noise process ξ (t) such that
+(cid:104)ξ (t)(cid:105) = 0,
+(cid:104)ξ (t)ξ (t(cid:48) )(cid:105) = Dδ(t − t(cid:48) ).
+(25)
+From this we construct an input signal by smoothing ξ (t) with
+a timescale 1/a,
+u(t) =
+dτ e−a|t−τ | ξ (τ )
+(26)
+(cid:90) ∞
+−∞
+in which case (cid:104)u(t)(cid:105) = 0 and (cid:104)u(t)u(t+ τ )(cid:105) = D(τ + 1
+a )e−aτ .
+We thus obtain random input signal with unit autocorrelation
+time and unit variance by choosing D = 1, a = 1. Further
+details about the construction of the input signal are given in
+the supplemental information.
+Reservoir Training
+Once a set of trajectories (cid:126)x(t) were generated on the interval
+[0, 5000] the portion of the trajectory on [0, 100] was removed
+as a transient. The remaining trajectories had a constant vector
+appended and training was then performed using scikit-learn’s
+Ridge regression method.
+In all cases the ridge regression
+parameter was set to k = 0.0001 such that the regularization
+of the weights was minimal.
+LRC simulations
+For Figure 2, the LRC network was constructed with γ =
+0.12, ∆ω = 0.7γ , and 71 LRC circuit elements corresponding
+to a cutoﬀ frequency of N ∆ω = 6H z .
+Achieving an estimate of the exact representation of the
+kernel in eqn. (18) required a close correspondence between
+simulations and the exact formula over many autocorrelation
+times of a rapidly oscillating system. As most integration
+schemes would lead to a small buildup of phase diﬀerences
+over these periods, we used the exact representation of the
+system trajectory to simulate the reservoir. The long-time
+limit solution of the reservoir is given by
+(cid:35) (cid:34) (cid:82) ∞
+− (cid:82) ∞
+0 dτ eλ+ τ u(t − τ )
+0 dτ eλ− τ u(t − τ )
+(cid:35)
+q(t)
+˙q(t)
+=
+1
+l(λ+ − λ− )
+1
+1
+λ+ λ−
+2l ± i
+(27)
+where λ± = − r
+4l2 = −γ ± iω . Simply inte-
+grating this is computationally inconvenient as it requires the
+evaluation of the integral over the full timecourse for every
+timestep. To avoid we ﬁrst consider the top integral in eqn.
+(51). Transforming the integral and using that u(t) = 0 for
+lc − r2
+(cid:34)
+(cid:35)
+(cid:34)
+(cid:113) 1
+(cid:90) ∞
+(cid:90) t
+0
+0
+dτ eλ+ τ u(t − τ )
+dτ eλ+ (t−τ )u(τ ).
+f+ (t) =
+=
+11
+(28)
+The second integral may be recovered from this as f− (t) =
+(cid:60)[f+ (t)] − i(cid:61)[f+ (t)]. The function f+ (t) then obeys the
+recursion relation for a timestep ∆t,
+f+ (t + ∆t) = eλ+ t (cid:0)f+ (t) +
+dτ e−λ= τ u(t + τ )(cid:1).
+(cid:90) ∆t
+0
+(29)
+which allows for an exact calculation of the trajectory with a
+single integral and integration over the interval [0, 5000] with
+a timestep of ∆t = 0.05. After training, the resulting weights
+were used to estimate the kernel in ﬁgure 2 from eqn. (18).
+Integration was performed using scipy’s quadrature package.
+Quadratic Capacity Figure
+The LRC network was the same as that described above.
+Memristors used had α = 3, β = 3, χ = 0.8. Memris-
+tor integrations were done using forward Euler method with
+a stepsize ∆t = 0.02 on eqn.
+(13). For single or paired
+memristors, ΩA = I , α = 3, β = 3 and χ = 0.8. Paired
+memristors use one element subject to +u(t) and the other
+subject to −u(t). In all memristor simulations hard bound-
+aries are imposed on the integration to maintain w ∈ [0, 1].
+The memristor network consisted of a 5 × 5 triangular lattice
+with 56 memristor-voltage generator edges. Each voltage gen-
+erator was weighted with weights distributed evenly on the set
+[−1, −0.1] ∪ [0.1, 1].
+Hybrid Network Figure
+The top panel of ﬁgure 5 shows a reservoir composed of two
+memristors driven with opposite polarity, used to drive an LRC
+network of 10 elements. The memristors were conﬁgured and
+simulated as described in the above section. The trajectory of
+each memristor, x± (t) was used to drive an independent LRC
+reservoir with γ = 0.4, ∆ω = 0.4, and N = 10 corresponding
+to a cutoﬀ frequency of 4 Hz. Each LRC reservoir generated
+20 trajectories of the form qn± , ˙qn± for n = 1 . . . 10. Mem-
+ristor trajectories were calculated using forward Euler with a
+timestep of ∆t = 0.02 and eqn. (13).
+For the LRC to Memristor reservoir, ﬁrst the trajectories of
+an LRC network of 10 circuits as described above were calcu-
+lated using the driving signal on the interval [0, 5000]. From
+the LRC trajectories (cid:126)xs = [(cid:126)q , ˙(cid:126)q ] we deﬁne a coupling matrix to
+the deep memristor layer, (cid:126)sd = C (cid:126)xs such that every sum and
+diﬀerence of trajectories in (cid:126)xs is used to drive an independent
+memristor pair. As such, for every i, j ∈ {1 · · · 10} there are
+k1 . . . k4 such that
+sd,k1 = xs,i + xs,j , sd,k2 = −sd,k1
+sd,k3 = xs,i − xs,j , sd,k4 = −sd,k3
+Each of these voltage generators drives a memristor with
+α = 3, β = 3, χ = 0.8. The reservoir thus contains 2 ∗ 20 ∗ 19
+memristors and generates 20 LRC trajectories giving 780 in-
+dependent trajectories. As this reservoir contains an LRC
+network at its surface layer, it also has excellent linear compu-
+tation capacities, maintaining a computational capacity greater
+than 0.99 to a delay of τ = 10.
+Linear and Quadratic Memory Scaling
+
+
+To estimate the memory capacity of LRC networks with
+system size, networks were generated with N = 10,. . . 18 sub-
+circuits. For each reservoir, the cuttoﬀ frequency was chosen
+as 4 Hz, the frequency resolution as ∆ω = 4/N , and γ = ∆ω .
+The resulting reservoirs were driven with an input sequence
+on [0, 5000]. Training was then performed to reconstruct the
+delayed input u(t − τ ). To evaluate τ , a bijective search was
+performed to evaluate the delay at which the memory function
+m(τ ) = CT [u(t − τ )] fell below the threshold 1 − , termi-
+nating with a tolerance of 1. Finite size scaling analysis was
+found to be unnecessary as the calculated capacities did not
+vary with the length of the training interval. Error estimates
+are from the termination criteria of the bijective search.
+To estimate the quadratic memory capacity τ (2)
+, the tra-
+jectories of the LRC reservoirs above were used to drive
+deep memristor networks as described in the hybrid reser-
+voir section of the main text. To evaluate τ (2)
+, we wish to
+ﬁnd the area over which m2 (τ1 , τ2 ) > 1 − . First a bijec-
+tive search was run along the diagonal to ﬁnd the delay τ ∗
+at which the quadratic memory function m(τ , τ ) fell below
+1 − . Then the function was integrated numerically over
+τ1 ∈ [0, 2τ ∗ ] τ2 ∈ [0, 2τ ∗ ] with subdivisions of 0.5. This pro-
+vides an uncertainty in the numerical integration on the order
+).
+The quadratic capacities τ (2)
+show clear tendencies towards
+overestimation for smaller training intervals and larger reser-
+voir sizes. To combat this, we employed a ﬁnite size scaling
+analysis to estimate the capacity τ (2)
+in the limit of an inﬁ-
+nite training interval. A ﬁgure demonstrating this analysis is
+included in the supplemental information. We also note that
+linear and nonlinear memory functions were found to decrease
+rapidly outside of a region of support. As a consequence,
+capacities τ (n)
+depend only weakly on . However, for small
+values of  ﬂuctuations play a larger role and make capacities
+diﬃcult to estimate numerically. We found  = 0.1 struck a
+reasonable balance between high capacities and low ﬂuctua-
+tions on estimates. Errors from the ﬁt are estimated through
+the elements of the covariance matrix as ef it =
+covii where
+i is the index of the constant constant ﬁtting parameter. The
+total error estimate is given as etot = np.sqrte2
+.
+of eint = 2 ∗ 0.5 ∗ ∗2 ∗ np.sqrt(τ (2)
+int + e2
+f it
+√
+
+
+
+
+12
+Comparison to Echo State Networks
+For all tested reservoirs,
+trajectories were generated on
+[0, 5000] with training performed on [100, 4000] giving a train-
+ing error estimate of the nMSE. To assess the generalization
+error, the weights from the previous training were used to
+reconstruct the output on [4000, 5000] and a generalization
+nMSE was calculated as,
+Gen. nMSE :=
+(cid:104)(z (t) − ˆz (t))(cid:105)T
+(cid:104)z 2 (t)(cid:105)
+T
+(30)
+where the average (cid:104)·(cid:105)T is performed over the generalization
+window [4000, 5000]. Note that, unlike the nMSE, this quan-
+tity is not constrained to fall within [0, 1].
+For the ‘naive’ memristor network implementation, param-
+eters were taken as α = 3, β = 1, χ = 0.8 with inputs
+weighted on the set [−1, −0.1] ∪ [0.1, 1]. The network graph
+was chosen as a 17 × 17 triangular lattice with 800 edges.
+Input weights were generated as 400 evenly spaced weights on
+[0.1, 1], another 400 on [−1, −0.1].
+The hybrid LRC→Memristor reservoir was implemented
+identically as above.
+The ESN reservoir obeyed the diﬀerential equation
+˙(cid:126)x = −(cid:126)x + tanh (cid:0)Ω(cid:126)x + (cid:126)rb + (cid:126)riu(t)(cid:1)
+(31)
+where Ω is a generic matrix of interaction weights between
+neurons, (cid:126)rb is a bias vector and (cid:126)ri is a vector of input weights.
+In our case, Ω was chosen to be sparse with a constant fanout
+of 10, and each weight was initially chosen randomly as ±1.
+After generating this matrix it was scaled to obtain a maxi-
+mum spectral radius of r = 0.95 which was found to give best
+performance on the ﬁtting task. The bias and input weights
+were selected uniformly on [−1, 1] and were each indepen-
+dently scaled. Both had a range of acceptable performance
+centered around 0.2 for the bias weight scaling and 0.1 for the
+input weight scaling with nMSE ranging from 0.020 to 0.023.
+Integration was performed with forward Euler on the interval
+[0, 5000] with a timestep of ∆t = 0.05.
+SUPPLEMENTAL INFORMATION
+Input Signal
+The notions of computational capacity were originally de-
+veloped in the context of discrete time reservoirs. Central to
+the introduction of the fading memory Hilbert space is the
+deﬁnition of an inner product between functions in terms of
+an expectation over an ensemble of input signals. Specif-
+ically, for functions z [u] and z (cid:48) [u] that depend only on the
+previous h timesteps, the inner product between these is de-
+ﬁned as the expectation over the ensemble of previous histo-
+ries, (cid:104)z , z (cid:48) (cid:105) = EU h [zz (cid:48) ] where U h is the space of previous
+histories where each timestep is i.i.d. sampled from a dis-
+tribution p(u). The resulting input signals are uncorrelated
+. The computational capacity
+(cid:104)u(t − τ1 )u(t − τ2 )(cid:105) = σ2 δτ1 ,τ2
+13
+Figure 7. A comparison between memristor, hybrid and echo state network reservoirs on the ﬁtting task described in eqn. (21). In the top
+panel, we show the results of a ’naive’ implementation of a memristor reservoir consisting of a triangular lattice of 800 memristors. In the
+middle panel we show the results from the hybrid LRC→Memristor reservoir with a total of 780 trajectories. In the bottom panel, we show an
+echo state network implementation contains 780 elements with parameters tuned to the ﬁtting task. In the legends note that the hybrid networks
+have a 12-fold improvement over the memristor network alone, perform on par with the ESN implementation.
+for reconstructing linear functions of the input thus measure
+the ability to recall the exact state of the input signal at some
+previous time.
+In continuous time we must cope with the introduction of
+the timescale of our reservoir. A dynamical system will have
+some characteristic timescale over which it can vary and will
+generally display an autocorrelation function that is decreas-
+ing with the time diﬀerence on that same timescale, e.g. for
+a system with timescale t∗ , (cid:104)x(t)x(t − τ )(cid:105) = f (τ /t∗ ).
+In
+formulating an input signal we have two options for how to
+proceed.
+One would be to drive the system with a noise process ξ (t)
+which maintains the uncorrelated feature of the driving process
+from discrete time, (cid:104)ξ (t)ξ (t − τ )(cid:105) = 2Dδ(τ ). The reservoir
+would no longer be able to construct the rapid variations of
+the noise process, but we could assess how well the system
+computed various ﬁlters of this noise, for example z (t) =
+0 dτ e−ατ ξ (t − τ ). In this setting however, the connection
+to previous work is indirect and requires choosing particular
+timescales in which to perform memory reconstructions.
+Alternatively, following [22] we can produce a signal that
+varies on the appropriate timescale by ﬁltering a noise process
+and utilize this as the driving signal of our reservoir. We
+choose to proceed along this route as it most resembles the
+tasks towards which reservoir computing is applied. As a
+signal, we elected to use gaussian white noise smoothed by a
+double-exponential window with a timescale 1/a
+(cid:82) ∞
+dτ e−a|t−τ | ξ (τ )
+(32)
+(cid:90) ∞
+−∞
+u(t) =
+where
+(cid:104)ξ (t)(cid:105) = 0,
+(cid:104)ξ (t)ξ (t(cid:48) )(cid:105) = Dδ(t − t(cid:48) ).
+(33)
+Applying these relationships we have (cid:104)u(t)(cid:105) = 0 and
+a )e−aτ . We thus obtain random
+(cid:104)u(t)u(t + τ )(cid:105) = D(τ + 1
+input signal with unit autocorrelation time and unit variance
+by choosing D = 1, a = 1. Note that over short times the
+characteristic timescale is 1
+.
+In ﬁgure 8 we show a sample input signal trajectory (top
+panel), the resulting autocorrelation function (middle panel)
+and the resulting power spectral density (bottom panel). The
+autocorrelation function panel contains both a sample auto-
+correlation function, calculated from a single trajectory of the
+input, and the analytical autocorrelation function above.
+2a
+Feasibility Properties of LRC reservoirs
+As the reservoir is composed of independent LRC circuits,
+it suﬃces to consider a single circuit. An LRC circuit with
+component values l, r, and c can be cast as the linear system,
+(cid:34)
+(cid:35)
+˙(cid:126)x =
+0
+1
+− 1
+lc − r
+l
+(cid:126)x +
+= A(cid:126)x + (cid:126)u.
+(34)
+where A has eigenvalues λ± = − r
+with negative real part.
+2l ± i
+lc − r2
+4l2 = −γ ± iω
+(cid:34)
+0
+s(t)
+l
+(cid:35)
+(cid:113) 1
+Fading Memory
+We ﬁrst establish that reservoirs composed of LRC motifs
+satisfy the fading-memory property, namely that two identi-
+cal reservoirs begun in states x0 and x(cid:48)
+and subject to the
+same driving signal (cid:126)u(t) will converge to the same state,
+0
+limt→∞ x(t) − x(cid:48) (t) = 0.
+For ∆(cid:126)x = (cid:126)x − (cid:126)x(cid:48)
+d
+dt
+∆(cid:126)x = A∆(cid:126)x
+(35)
+14
+Figure 8. A sample input signal trajectory (top panel), corresponding autocorrelation function (middle panel) and power spectral density (PSD)
+(bottom panel). The input signal was constructed by smoothing Gaussian white noise with a double exponential window with time constant
+1/a. The resulting autocorrelation function displays a long time exponential decrease as e−aτ . In simulations we set a = 1. The power
+spectral density of the resulting signal contains signiﬁcant contributions only from frequencies below 1.
+with solution
+∆x(t) = eAt∆(cid:126)x(0).
+(36)
+As the eigenvalues of A have negative real part − r
+, the dif-
+ference between the trajectories will converge to 0 as e− r
+2l t .
+2l
+Feasibility Properties of Memristor Reservoirs
+We consider a reservoir composed of memristors, and where
+the single memristor, idealized as a switch between two re-
+sistance values Roﬀ > Ron , is described by a parameter
+0 ≤ ηi ≤ 1
+State Separability
+The equation of motion above for two reservoirs subject to
+driving signals (cid:126)u(t) and (cid:126)u(cid:48) (t) with ∆(cid:126)u(t) = (cid:126)u(t) − (cid:126)u(cid:48) (t) leads
+to the equation of motion,
+d
+dt
+∆(cid:126)x = A∆(cid:126)x + ∆(cid:126)u(t).
+(37)
+Two reservoirs begun in the same state ∆(cid:126)x(0) = 0 will thus
+be initially diverging at a rate proportional to the diﬀerence
+between their respective driving signals. In the long time limit,
+the diﬀerence between trajectories can be solved explicitly as,
+(cid:90) ∞
+∆(cid:126)x(t) =
+dτ eAτ ∆(cid:126)u(t − τ ).
+(38)
+0
+The diﬀerence between the two reservoirs is thus identical to
+a reservoir driven with the diﬀerence of the inputs.
+d
+dt
+(39)
+ηi (t) = −αηi (t) +
+Ii (t)
+(cid:0)1 − η(t)(cid:1) + Ron η(t); α
+β
+where Ii (t) is the current in the device, with a resistance of
+the device is given by R(η) = Roﬀ
+and β are phenomenological parameters setting the decay and
+excitation of the device. It is convenient to write the equation
+in terms of the parameter χ = Roff −Ron
+, which is naturally
+less than one if Roﬀ > Ron .
+A memristor network is a model for a general circuit com-
+posed of memristors and with voltage generators in series to
+the memristors, given by the following vectorial and nonlinear
+diﬀerential equation [25]:
+Roff
+d(cid:126)η
+dt
+= −α(cid:126)η(t) +
+1
+β
+(I − χΩAH (t))−1 (cid:126)S
+(40)
+while we do not go into the detail of the derivation of the
+equation, we point out that ΩA is a projector operator on the
+cycle space of the circuit, e.g. Ω2 = Ω, while Mij = δij mi (t).
+The input to the network can be voltages in series to the
+memristors, injected at the nodes, or current sources in par-
+allel or injected at the nodes. For all these cases, we have
+15
+We can now use the inequality ||(I − A)−1 || ≤ 1/(1 − ||A||).
+It follows that
+||(I − χΩA f (H (cid:48) ))−1 || ≤
+1
+1 − χ||ΩA f (H )|| ,
+(43)
+where ||ΩA f (H )|| = σ(ΩA f (H )) is the minimum eigenvalue
+of ΩA f (H ), which is a semi-positive matrix with maximum
+eigenvalue 1. This implies that, and thus the matrix is upper
+bounded by 1/(1 − χ). We thus have
+||(cid:126)yk+1 ||2 ≤ (1−α(cid:48) )||(cid:126)yk ||2+
+χ|| (cid:126)M ||2
+(1 − χ)2β (cid:48) ||ΩA (f (H )−f (H (cid:48) ))||.
+(44)
+We note that f : [0, 1] → [0, 1], and that f (H ) is a diagonal
+matrix. It follows that if we introduce ||ΩA (f (H )−f (H (cid:48) ))|| =
+|| (cid:126)f (H ) − (cid:126)f (H (cid:48) )||2 ≤ C1 ||(cid:126)yk ||2 , we have
+||(cid:126)yk+1 ||2 ≤ (1 + α(cid:48) )||(cid:126)yk ||2 + C1
+(cid:32)
+χ|| (cid:126)S ||2
+(1 − χ)2β (cid:48) ||(cid:126)yk ||2
+(cid:33)
+1 − α(cid:48) +
+C1χ
+(1 − χ)2
+|| (cid:126)S ||2
+β (cid:48)
+||(cid:126)yk+1 ||2 (45)
+=
+We thus ﬁnd that if
+χ|| (cid:126)S ||2
+(1 − χ)2β (cid:48) < α(cid:48)
+C1
+(46)
+then we have the contracting property. Rewritten, we have the
+following inequality:
+|| (cid:126)S ||2 <
+(1 − χ)2αβ
+χC1
+(47)
+from which get that as long at the system is input-led with small
+enough voltages or currents, a memristor network satisﬁes the
+contracting property which is independent from the time step,
+as one would expect. If we read-out the resistive states, then the
+proof ends here, as the resistive states are continuous functions
+of the internal states. If instead we read out the voltage across
+the motif, then we need to show that this implies that also the
+voltage states are the same.
+We now have two possibilities.
+If we input the system
+with voltage in series with the resistor (or memristor), then
+this implies that the voltage on the j -th motif is V j
+is the read-out function. In
+this case, as long as the current is non-zero almost everywhere,
+then the echo state property is valid. In the case in which the
+current source is in parallel to the motif, then we have a voltage
+input function of the form V j
+c (Ic (t)) which is not easily related
+to the voltage source, but the argument is equally valid.
+c (t) + ij (t)Rj (η(t)), where V j
+V j
+ro (t) =
+ro
+State Separability
+Fading Memory
+Let us now discuss the problem of using memristors as a
+reservoir. First, we consider discrete dynamics in which we
+use an Euler integration scheme to study the convergence.
+First, let us deﬁne the echo state property. Let X be the set
+of internal states of the reservoir. Then
+(Echo State Property). A network F : X × U → X (with
+the compactness condition) has the echo state property with
+if for any left inﬁnite input sequence u−∞ ∈
+respect to U :
+U −∞ and any two state vector sequences x−∞ , y−∞ ∈ X −∞
+compatible with u−∞ , it holds that x0 = y0 .
+One of the two properties which are desirable is the fact that
+diﬀerent internal initial state with identical external driving
+converges to the same asymptotic state. This is also called the
+echo state, or contracting, or fading, property.
+Speciﬁcally, consider two network states (cid:126)η and (cid:126)η (cid:48) . Follow-
+ing the proof by Jaeger for ESNs, we have that for the case of
+memristor dynamics, we have
+k+1 ||2
+||(cid:126)yk+1 ||2 = ||(cid:126)ηk+1 − (cid:126)η (cid:48)
+= ||(1 − α(cid:48) )(cid:126)yk − 1
+(g(H ) − g(H (cid:48) )) (cid:126)S ||2
+β
+≤ (1 − α(cid:48) )||(cid:126)yk
+β (cid:48) − (g(H ) − g(H (cid:48) )) (cid:126)S ||2
+1
+≤ (1 − α(cid:48) )||(cid:126)yk ||2 +
+1
+||g(H ) − g(H (cid:48) )||sup || (cid:126)S ||2
+β
+where g(H ) = (I − χΩA f (H ))−1 , and α(cid:48) = dt · α and β (cid:48) =
+. For “linear” memristors, f (H ) = H . Here we consider
+for the proof a discretized version of the dynamics (using an
+Euler scheme), but show that the ﬁnal result is independent
+from the step size of the discretization.
+We would like to prove that
+β
+dt
+||(cid:126)yk+1 ||2 ≤ C ||(cid:126)yk ||2
+(41)
+with C < 1. Let us thus focus on ||g(H )−g(H (cid:48) )||sup . We now
+use the second resolvent identity for the matrix A = χΩA f (H )
+and z = 1, and write the following bound
+
+respectively [28]
+(cid:126)S =
+ΩA(cid:126)s
+A(AT A)−1(cid:126)sext
+ΩB(cid:126)j
+Voltage sources in series
+Voltage sources at nodes
+Current sources in parallel
+B T (BB T )−1(cid:126)jext Current sources at nodes.
+While in the paper we focus on the voltages in series, and thus
+(cid:126)S = ΩA(cid:126)s, the proof below is general. Given the equation
+above, we now prove some of the key properties for the dy-
+namical system to be feasible as a Reservoir, assuming that we
+read-out either the voltage or the current in the device.
+||(I − χΩA f (H ))−1 − (I − χΩA f (H (cid:48) ))−1 ||
+≤ χ||(I − χΩA f (H ))−1 ||
+· || (ΩA (f (H ) − f (H (cid:48) )) ||
+· ||(I − χΩA f (H (cid:48) ))−1 ||
+(cid:126)η (cid:48)
+As a measure of state separability, we ask that ||(cid:126)ηk+1 −
+k+1 ||2 ≥ 0 ∀t. For the case memristor reservoirs we consider
+two identical initial states (cid:126)x0 , but with diﬀerent input (driving),
+(cid:126)S1 and (cid:126)S2 . We would like to prove that the time evolution of
+(42)
+16
+the two states is such that ||(cid:126)yk ||2 diverges, e.g.
+greater than zero.
+We have
+it is always
+||(cid:126)yk+1 ||2 = ||(cid:126)ηk+1 − (cid:126)η (cid:48)
+(1 − χΩf (Hk ))
+k+1 ||2
+= ||(− 1
+β
+−1 ( (cid:126)S1 − (cid:126)S2 )||2 (48)
+Now, since the matrix
+1
+β
+(I − χΩf (Hk ))
+−1
+has a trivial kernel for arbitrary f (Hk ), this is suﬃcient to
+show that if (cid:126)S1 − (cid:126)S2 (cid:54)= 0, then necessarily
+||(cid:126)yk+1 ||2 > 0 ∀(cid:126)xk .
+(49)
+This is suﬃcient to show that the trajectories must be locally
+diverging, and that thus the reservoirs have diﬀerent internal
+states. This is a local version of the state separability as it is
+a local (in time) rather than global condition, but if we can
+show that already at this level not all input allow the states to
+diverge, then this cannot hold at a global level.
+Now, if the voltage or the current sources are at the nodes, it
+is true that for suﬃciently small (diﬀerent) inputs (cid:126)Sext and (cid:126)jext
+the state separability cannot be always preserved. This is due
+to the fact that the operators A(AT A)−1 and B T (BB T )−1
+can have non-trivial kernels. The reason can be easily seen
+if the memristor network is input-led via voltage sources in
+series or currents in parallels, there can be redundancy in the
+input. In fact, if
+(cid:126)j 1
+(cid:126)S 1
+ext = (cid:126)j 2
+ext = (cid:126)S 2
+ext + (I − ΩB )(cid:126)k
+ext + (I − ΩA )(cid:126)k
+(50)
+for arbitrary (cid:126)k , we will have (cid:126)S1 − (cid:126)S2 = 0 identically. We can
+thus construct simple counterexamples for which the state evo-
+lution is identical for completely diﬀerent inputs, and violates
+the state separability property. This is due to a freedom in
+deﬁning the voltage drops on the edge, and is reﬂected in how
+we can input the system. This property has been described in
+previous papers. Thus, state separability is true as long as dif-
+ferent inputs are not equal up to the transformation described
+in eqn. (50).
+Solution of LRC circuits
+An LRC circuit has the long time limit solution,
+(cid:34)
+q(t)
+˙q(t)
+(cid:35)
+=
+1
+l(λ+ − λ− )
+(cid:34)
+(cid:113) 1
+0 dτ eλ+ τ u(t − τ )
+1
+1
+0 dτ eλ− τ u(t − τ )
+λ+ λ−
+4l2 = −γ ± iω .
+(cid:35) (cid:34) (cid:82) ∞
+− (cid:82) ∞
+(cid:35)
+(51)
+where λ± = − r
+Given a γ and ∆ω , we choose ln = 1, rn = 2γ and
+2l ± i
+lc − r2
+cn =
+1
+n2∆ω2 + γ 2
+(52)
+in which case we have that the resulting LRC circuits have
+eigenvalues λn,± = −γ ± in∆ω . The resulting trajectories of
+the system are
+qn (t) =
+1
+ln∆ω
+1
+ln∆ω
+(cid:90) ∞
+(cid:90) ∞
+0
+dτ e−γ τ sin(n∆ωτ )u(t − τ )
+˙qn (t) =
+0
+dτ e−γ τ [n∆ω cos(n∆ωτ )−
+γ sin(n∆ωτ )] u(t − τ ).
+(53)
+As noted in the main text, a linear transformation of these
+trajectories can be expressed in a form that resemble the fa-
+miliar Fourier transform.
+xn (t) =
+(cid:90) ∞
+(cid:90) ∞
+0
+dτ e−γ τ sin(n∆ωτ )u(t − τ )
+(54)
+yn (t) =
+0
+dτ e−γ τ cos(n∆ωτ )u(t − τ ).
+(55)
+The set of frequencies ranging from ∆ω to N ∆ω set the
+bandwidth of signals that the network can reconstruct, while
+γ imposes a cutoﬀ time. In order for the network to perform
+reconstructions, this should suppress the input outside of an
+interval given by the lowest frequency ∆ω ∼ 1
+. We thus
+choose γ = τ in our construction of LRC networks.
+τ
+Volterra Series Solution of Memristor Equations
+For a single memristor we can use the expansion of the
+inverse and integrate out the linear term to write the equation
+as
+d
+dt
+(eαtx) =
+1
+β
+eαt
+∞(cid:88)
+n=0
+(χx)nu(t).
+(56)
+Then integrating and taking the long time limit, we have a
+formal expression for x as,
+x(t) =
+1
+β
+∞(cid:88)
+n=0
+χn
+(cid:90) ∞
+0
+dτ e−ατ xn (t − τ )u(t − τ ).
+(57)
+We assume a solution in the form of a Volterra series ex-
+pansion,
+dτ1 h1 (τ1 )u(t − τ1 )
+x(t) =h0 +
+dτ1dτ2 h2 (τ1 , τ2 )u(t − τ1 )u(t − τ2 ) + · · ·
+(cid:90) ∞
+0
++
+(cid:90) ∞
+0
+(58)
+= h0 +
+∞(cid:88)
+n=0
+Hnu.
+(59)
+Inserting this into eqn. (57) and matching powers of u we have
+(60)
+h0 = 0
+1
+β
+χ
+β 2
+H1u =
+(cid:90) ∞
+(cid:90) ∞
+0
+dτ1 e−ατ1 u(t − τ1 )
+dτ2 e−ατ2 u(t − τ1 )u(t − τ2 ) (62)
+(61)
+H2u =
+0
+dτ1
+(cid:90) ∞
+τ1
+where we have used the convention U = diag((cid:126)u).
+17
+Finite Size Scaling of Quadratic Memory Capacities
+τ (2)
+
+As noted in the main text, the quadratic memory capacities
+show a tendency towards overestimation for ﬁnite training
+intervals. This may be seen clearly in ﬁgure 9 where we
+have plotted the quadratic capacities for various reservoir sizes
+estimated from simulation against the inverse training time 1
+.
+The sizes given in the ﬁgure legend correspond to the number
+of subcircuits in the surface LRC reservoir while the total
+number of trajectories in each reservoir is 8N 2 − 2N . For
+each size, a 2nd-order polynomial ﬁt is also plotted. Fits were
+performed using Numpy’s polyﬁt function and the constant
+T → 0. These
+parameter was taken as the limiting value as 1
+are plotted against reservoir size in the main text, ﬁgure 6.
+T
+Figure 9. The ﬁnite size scaling analysis of quadratic memory capac-
+ities in hybrid LRC→Memristor reservoirs. Estimates from simula-
+tions are shown by circular makers connected by thick lines. Sizes in
+the legend are that of the surface LRC reservoir (number of subcir-
+cuits). A surface LRC reservoir of size N corresponds to 8N 2 − 2N
+total trajectories. Estimates of the quadratic memory capacity are
+shown as a function of the inverse training time 1
+. A 2nd-order
+polynomial ﬁt is also shown at each size. The capacities given in the
+main text correspond to the values of the ﬁt at 1
+T
+T = 0.
+with subsequent powers following similarly. We immediately
+observe that:
+the nonlinear kernels produced by memristors
+are moderated by powers of 0 ≤ χ ≤ 1, and the kernels take
+the form of low pass ﬁlters of products of the input signal,
+decaying at a rate governed by α.
+For the case of networks of memristor elements, the same
+manipulations lead to a formal expression for x(t) which in-
+cludes the eﬀect of interactions through the cycle space pro-
+jector Ω,
+This leads to corresponding terms in the expansion
+∞(cid:88)
+(cid:90) ∞
+x(t) =
+1
+β
+χn
+n=0
+0
+(cid:90) ∞
+(cid:90) ∞
+0
+H1u =
+h0 = 0
+1
+β
+χ
+β 2
+H2u =
+dτ e−ατ (ΩX (t−τ ))nΩ(cid:126)u(t−τ ). (63)
+ACKNOWLEDGEMENTS
+(64)
+(cid:90) ∞
+dτ1 e−ατ1 Ω(cid:126)u(t − τ1 )
+dτ2 e−ατ2 ΩU (t − τ1 )Ωu(t − τ2 )
+dτ1
+(65)
+0
+τ1
+(66)
+The work of FC and FCS was carried out under the aus-
+pices of the NNSA of the U.S. DoE at LANL under Con-
+tract No. DE-AC52-06NA25396. FC was also ﬁnanced via
+DOE-ER grants PRD20170660 and PRD20190195, and FCS
+by a CNLS Fellowship and 20190195ER. AK was supported
+by grant number FQXi-RFP-IPW-1912 from the Foundational
+Questions Institute and Fetzer Franklin Fund, a donor advised
+fund of Silicon Valley Community Foundation. AK thanks the
+Santa Fe Institute for helping to support this research.
+[1] H. Jaeger, The “echo state” approach to analysing and train-
+ing recurrent neural networks-with an erratum note, Tech. Rep.
+148.34 (Bonn, Germany: German National Research Center for
+Information Technology GMD, 2001).
+[2] H. Jaeger,
+in GMD-German National Research Institute
+for Computer Science (2002),
+http://www.faculty.jacobs-
+university.de/hjaeger/pubs/STMEchoStatesTechRep.pdf
+(Cite-
+seer, 2002).
+[3] M. Lukoševičius, in Neural networks: Tricks of the trade
+(Springer, 2012) pp. 659–686.
+[4] N. Bertschinger and T. Natschläger, Neural computation 16,
+1413 (2004).
+[5] H. Jaeger and H. Haas, science 304, 78 (2004).
+[6] J. Pathak, B. Hunt, M. Girvan, Z. Lu, and E. Ott, Physical
+review letters 120, 024102 (2018).
+[7] G. Tanaka, T. Yamane, J. B. Héroux, R. Nakane, N. Kanazawa,
+S. Takeda, H. Numata, D. Nakano,
+and A. Hirose, Neural
+Networks 115, 100 (2019).
+[8] L. Chua, IEEE Transactions on circuit theory 18, 507 (1971).
+[9] D. B. Strukov, G. S. Snider, D. R. Stewart, and R. S. Williams,
+Nature 453, 80 (2008).
+[10] A. Zegarac and F. Caravelli, EPL (Europhysics Letters) 125,
+10001 (2019).
+[11] F. Caravelli and J. P. Carbajal, Technologies 6, 118 (2018).
+[12] L. Appeltant, M. C. Soriano, G. Van der Sande, J. Danckaert,
+S. Massar, J. Dambre, B. Schrauwen, C. R. Mirasso, and I. Fis-
+cher, Nature communications 2, 1 (2011).
+[13] J. Torrejon, M. Riou, F. A. Araujo, S. Tsunegi, G. Khalsa,
+D. Querlioz, P. Bortolotti, V. Cros, K. Yakushiji, A. Fukushima,
+et al., Nature 547, 428 (2017).
+[14] M. J. Marinella and S. Agarwal, Nature Electronics 2, 1 (2019).
+[15] M. S. Kulkarni and C. Teuscher, in 2012 IEEE/ACM Interna-
+tional Symposium on Nanoscale Architectures (NANOARCH)
+(IEEE, 2012) pp. 226–232.
+[16] C. Du, F. Cai, M. A. Zidan, W. Ma, S. H. Lee, and W. D. Lu,
+Nature communications 8, 2204 (2017).
+[17] J. P. Carbajal, J. Dambre, M. Hermans, and B. Schrauwen,
+Neural Computation 27 (2015), 10.1162/NECO_a_00694,
+18
+arXiv:1406.2210.
+[18] V. Athanasiou and Z. Kokoli, Sc. Rep. 10 (2020).
+[19] W. Maass, T. Natschläger, and H. Markram, Neural computation
+14, 2531 (2002).
+[20] W. Maass, P. Joshi, and E. D. Sontag, PLoS Comput Biol 3,
+e165 (2007).
+[21] J. Dambre, D. Verstraeten, B. Schrauwen, and S. Massar, Sci-
+entiﬁc reports 2, 514 (2012).
+[22] M. Hermans and B. Schrauwen, Neural Networks 23, 341
+(2010).
+[23] M. Inubushi and K. Yoshimura, Scientiﬁc reports 7, 10199
+(2017).
+[24] O. L. White, D. D. Lee, and H. Sompolinsky, Physical review
+letters 92, 148102 (2004).
+[25] F. Caravelli, F. L. Traversa, and M. Di Ventra, Physical Review
+E 95, 022140 (2017).
+[26] S. Boyd and L. Chua, IEEE Transactions on circuits and systems
+32, 1150 (1985).
+[27] C. Gallicchio, A. Micheli, and L. Pedrelli, Neurocomputing
+268, 87 (2017).
+[28] C. F. Sheldon and F. Caravelli, to appear -, (2020).

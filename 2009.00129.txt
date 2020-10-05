@@ -1,0 +1,1176 @@
+0
+2
+0
+2
+g
+u
+A
+1
+3
+]
+A
+N
+.
+h
+t
+a
+m
+[
+1
+v
+9
+2
+1
+0
+0
+.
+9
+0
+0
+2
+:
+v
+i
+X
+r
+a
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+AVINASH KULKARNI AND TRISTAN VACCON
+Abstract. The QR-algorithm is one of the most important algorithms in linear algebra. Its several
+variants make feasible the computation of the eigenvalues and eigenvectors of a numerical real or
+complex matrix, even when the dimensions of the matrix are enormous. The ﬁrst adaptation of the
+QR-algorithm to local ﬁelds was given by the ﬁrst author in 2019. However, in this version the rate of
+convergence is only linear and in some cases the decomposition into invariant subspaces is incomplete.
+We present a reﬁnement of this algorithm with a super-linear convergence rate in many cases.
+1. Introduction
+Eigenvalues and eigenvectors are ubiquitous throughout mathematics and industrial applications.
+Much attention has been directed towards developing algorithms to compute the eigenvectors of a
+ﬁnite precision real or complex matrix, whether for the purposes of making new computations feasible
+in research or for a more eﬃcient product in industry. Given the successes of eigenvector methods in
+numerical linear algebra, one can hope that exciting novel applications can come from the compara-
+tively unexplored area of ﬁnite precision p-adic linear algebra. In analogy, we refer to the sub ject as
+pnumerical linear algebra.
+The topic of pnumerical linear algebra was ﬁrst addressed in the latter half of the 20th century
+[Dix82, PP95]. Recently it has seen renewed interest [Ked10, CRV15, CRV17]. A noteworthy application
+is a polynomial time algorithm for computing points on an algebraic curve over a ﬁnite ﬁeld based
+on computing the characteristic polynomial of a p-adic matrix [Ked01]. This is useful in practical
+cryptography to select curves with good properties for cryptosystems. Another application is in solving
+a 0-dimensional system of polynomial equations over Qp [Kul20, BL12].
+The ﬁrst method for computing the eigenvectors of a p-adic (or real) matrix M is the schoolbook
+algorithm, consisting of the following steps:
+(1) Compute a Hessenberg form for M . (Optimization for step 4.)
+(2) Compute the characteristic polynomial of M .
+(3) Solve for the roots {λi}.
+(4) Compute ker(M − λi I ) for each i.
+(4b) (For block Schur form:) Compute ker(M − λi I )di for some di .
+Over the reals, this is not the main algorithm used in practice since step (3) is numerically unstable.
+A similar diﬃculty is encountered p-adically, in that one needs to know the characteristic polynomial
+at the maximum possible p-adic precision in order to correctly compute the roots. In the worst case
+scenario, for an n×n input matrix given at N digits of precision in each entry, one needs to compute the
+characteristic polynomial using arithmetic with nN digits – for examples see Section 2.4. For practical
+considerations, one must be careful of the extra costs imposed by precision increases. Worse still,
+step 4b can fail to give the correct answer due to a lack of precision on the input (see Example 3.1.1).
+Unlike R, p-adic ﬁelds admit algebraic extensions of arbitrarily large degree. Consequently, the cost
+of doing arithmetic in an extension is potentially much more severe.
+To represent the ﬁnite precision of the input, we will say that M ∈ Mn (Qp ) is known with (absolute)
+error O(pN ) if we know the initial part a−v p−v + . . . + aN −1pN −1 + O(pN ) of the p-adic expansion for
+each entry in the matrix M . We say that A = B + O(pN ) if the p-adic expansion for every entry of
+2010 Mathematics Subject Classiﬁcation. 15A18 (primary), 11S05 (secondary).
+Key words and phrases. QR-algorithm, p-adic algorithm, power series, symbolic-numeric, p-adic approximation,
+pnumerical linear algebra.
+Avinash Kulkarni has been supported by the Simons Collaboration on Arithmetic Geometry, Number Theory, and
+Computation (Simons Foundation grant 550033) and by the Forschungsinitiative on Symbolic Tools at TU Kaiserslautern.
+1
+2
+AVINASH KULKARNI AND TRISTAN VACCON
+A − B up to the pN term is 0. In Section 2, we discuss p-adic precision in more detail. We say that a
+matrix is in block Schur form if it is block upper triangular and the characteristic polynomial of each
+diagonal block is irreducible. The main problem of this article is:
+Problem 1.0.1. Given an n × n matrix M over Qp , whose entries are known with error O(pN ),
+compute a block Schur form T for M and a matrix U such that M U = U T + O(pN ).
+Of course, by passing to the splitting ﬁeld of the characteristic polynomial, we can convert a block
+Schur form to a Schur form by triangularizing each of the blocks. In this article, we choose to use only
+Qp -arithmetic. The beneﬁt being that we procrastinate on doing expensive extension ﬁeld arithmetic.
+When M ∈ Mn (Zp ), it is possible to put M into a block Schur form via some V ∈ GLn (Zp ).
+Theorem (3.0.2). Let M ∈ Mn (Zp ) and let χM = f1 · · · fr be a factorization in Zp [t] where the factors
+are pairwise coprime in Qp [t]. Then there exists a U ∈ GLn (Zp ) such that U M U −1 is block-triangular
+with r blocks; the j -th block accounts for the eigenvalues λ such that fj (λ) = 0.
+Our method of proof is to combine standard arguments for the existence of canonical forms over a
+ﬁeld with the notion of orthogonality, introduced in Schikhof [Sch06] and discussed in Section 2. As
+an immediate corollary, we obtain a reﬁnement of the decomposition of [Ked10, Theorem 4.3.11].
+Corollary (3.0.3, Newton decomposition). Let M ∈ Mn (Zp ) and let ν1 ≤ . . . ≤ νr be the distinct
+valuations of the eigenvalues of M . Then there exists a U ∈ GLn (Zp ) such that U M U −1 is block-
+triangular with r diagonal blocks; the j -th block accounts exactly for the eigenvalues of valuation νj .
+We next show how to improve the iterative computation of the block Schur form introduced in
+[Kul20]. Our main theorem is:
+Theorem (5.1.1). Let M ∈ Mn (Zp ) be a matrix whose entries are known with error O(pN ). If the
+characteristic polynomial of M modulo p is square-free and factors completely then Algorithm 5.1
+computes a Schur form T and a matrix U ∈ GLn (Zp ) such that M U = U T + O(pN ) in at most
+3 n3 log2 N + o(n3 log2 N ) arithmetic operations in Zp at N -digits of precision. In particular, T reveals
+al l the eigenvalues of M with error O(pN ). An additional O(n3 ) arithmetic operations in Qp is then
+enough to compute a Qp -basis of eigenvectors with coeﬃcients in Zp .
+2
+If the assumptions of the theorem above are not met, our algorithm will attempt to use the accel-
+erated convergence strategy anyway. The timings in Section 6 demonstrate a signiﬁcant improvement
+over both the classical method and the basic QR-iteration in [Kul20] in computing a weak block Schur
+form (see Deﬁnition 5.0.1), even when the hypothesis on the characteristic polynomial is not satisﬁed.
+Furthermore, the slowdown of convergence can be detected dynamically in Algorithm 4.3. Should this
+occur we fallback to running the QR-iteration with linear convergence, as in [Kul20].
+We describe the layout of the article. For the remainder of Section 1, we establish notation and then
+precisely state our results regarding Algorithm 4.3. In Section 2 we discuss the background needed in
+the article. In Section 3, we prove Theorem 3.0.2 and discuss the computation of sorted and size-sorted
+forms. In Section 4, we discuss the improved QR-iteration; here we give Algorithm 4.3. In Section 5,
+we combine our results to produce Algorithm 5.1 and we also prove Theorem 5.1.1. Finally, in Section 6
+we discuss the implementation of our algorithm and give some timings.
+1.1. Notation. We denote by ‘∗’ a wildcard (Zp -)integral entry or block of integral entries in a matrix.
+Generally, we will use the wildcard entries in upper-right blocks as they are not especially noteworthy
+in our analysis aside from the fact that they are integral. For a matrix M , we denote its left kernel by
+lker(M ) and its characteristic polynomial by χM . If χM (t) ∈ Zp [t] we denote by χM ,p the reduction
+of χM to the residue ﬁeld. The standard basis vectors are denoted by e1 , e2 , . . . , en . For a ring R, the
+ring of n × n-matrices with entries in R is denoted Mn (R). The (i, j )-th entry of a matrix is denoted
+A{i, j } and A{•, j } denotes the j -th column. Our choice of notation deviates from the standard to
+improve the readability of expressions like (cid:12)(cid:12)(cid:12)R(j)
+B {1, 1}(cid:12)(cid:12)(cid:12).
+The p-adic absolute value is denoted by |·| and normalized so that |p| = p−1 , for a vector v we
+denote kvk := maxi |vi |, and for a matrix A we denote kAk := maxi,j |A{i, j }|. For a polynomial
+f := fnxn + . . . + f0 , we denote kf k := maxi |fi |.
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+3
+For a matrix A, we denote its smallest singular value by σ∗ (A). i.e. its invariant factor with smallest
+norm. An eigenvalue λ of A ∈ Mn (Zp ) is smal l if |λ| < 1, and big otherwise.
+1.2. The iteration subroutine. Our iteration subroutine is the heart of the main algorithm. In this
+last section of the introduction, we introduce some deﬁnitions to describe the input to the iteration
+subroutine, and state the results on its output.
+Deﬁnition 1.2.1. A matrix (cid:20)A ∗
+E B(cid:21) ∈ Mn (Zp ) is called sorted if for some λ ∈ Zp we have
+E ≡ 0 (mod p), χB (t) ≡ (t − λ)nB
+(mod p),
+and χA (λ) 6≡ 0 (mod p)
+where nB is the number of columns of the square matrix B . In the special case that χB (t) ≡ tnB
+(mod p), we say that the matrix is size-sorted.
+If M is a sorted matrix whose B -block has size 1, then the shift M − (M {n, n})I is a size-sorted
+matrix. A sorted Hessenberg matrix is a matrix which is both sorted and in Hessenberg form. Similarly,
+a size-sorted Hessenberg matrix is a size-sorted matrix in Hessenberg form. As these matrices feature
+prominently in our discussion of the QR-algorithm, we give them a special notation.
+Deﬁnition 1.2.2. We denote by [A; ǫ, B ] a sorted Hessenberg matrix of the form
+[A; ǫ, B ] := 
+The block sizes of [A; ǫ, B ] is the tuple (nA , nB ). If only one of the block sizes is relevant, we use the
+wildcard character ‘∗’ to hold the place of the other entry.
+Deﬁnition 1.2.3. Let M ∈ Mn (Qp ). A QR-round (with shift µ) is the computation consisting of the
+following steps applied to M :
+with A ∈ MnA (Zp ), B ∈ MnB (Zp ), ǫ ∈ Zp .
+ ,
+∗
+B
+A
+0
+ǫ
+0 0
+1. Compute a QR-factorization M − µI = QR
+2. Set Mnext := RQ + µI
+If a value for the shift µ is not mentioned explicitly, we mean µ = 0 by default. It will always be clear
+from context to which matrix we apply the QR-round steps when we use the term.
+To clarify our terminology, the term QR-iteration broadly refers to a process consisting of multiple
+QR-rounds applied to an input matrix, particularly when we do not wish to specify the shifts or the
+number of rounds for the sake of exposition. Alternatively, Algorithm 4.3, which is titled QR Iteration,
+is a QR-iteration where the number of QR-rounds is determined in advance based on the input and
+the shifts are chosen deterministically during the iteration.
+We now state our technical result regarding the convergence of the QR-iteration applied to a size-
+sorted Hessenberg matrix.
+Proposition (4.4.1). Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix, let m = nB and let
+λ1 , . . . , λm be the smal l eigenvalues of M . If η := maxi,j |λi − λj | ≤ |ǫ|, then after m QR-rounds
+we obtain a size-sorted Hessenberg matrix [Anext ; ǫnext , Bnext ] such that |ǫnext | ≤ (cid:12)(cid:12)ǫ2 (cid:12)(cid:12). Each round
+uses 2n2 + o(n2 ) operations of Qp arithmetic. After at most (m⌈log2 (− logp η)⌉) rounds, the obtained
+[Anext ; ǫnext , Bnext ] is such that |ǫnext | < η .
+Note that if η ≤ p−N (which vacuously occurs when m = 1), we need at most (m⌈log2 N ⌉) QR-
+rounds (with shifting) to deﬂate ǫ to 0 + O(pN ).
+Remark 1.2.4. If A + O(pN ) is an n × n-matrix whose entries are chosen with the uniform probability
+distribution on [0, . . . , pN − 1], then the limit as n → ∞ of the probability that χA is square-free is at
+least 1−p−5
+1+p−3 [Ful02].
+4
+AVINASH KULKARNI AND TRISTAN VACCON
+2. Background
+2.1. Precision and QR-factorizations. We state some basic deﬁnitions for our discourse. We follow
+[Kul20] for terminology, and direct the reader to [CRV15, Car17, Ked10] for more details. We can
+identify a subgroup of GLn (Qp ) where every matrix is well-conditioned, serving the analogous role to
+On (R) in the real setting.
+Lemma 2.1.1. Let A ∈ GLn (Qp )
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+5
+QR-round applied to a Hessenberg matrix is bounded by n2 arithmetic operations. If we also compute
+an update V 7→ Q−1V to a transformation matrix, the total cost is 2n2 arithmetic operations.
+We now come to the discussion of p-adic precision. There are many ways to represent a p-adic
+element a ∈ Qp in a computer system [Car17]. We represent an element of Qp by a truncated series
+a = a−r p−r + . . . + a0 + pa1 + a2p2 + . . . + aN −1pN −1 + O(pN )
+where the O(pN ) is the p-adic ball representing the uncertainty of the remaining digits. The relative
+precision of a is the quantity N + r, and the absolute precision is the number N . In the terminology
+of [Car17], we consider a system with the zealous (i.e, interval ) implementation of arithmetic. The
+operations −, + preserve the minimum of the absolute precision of the operands, and ×, ÷ preserve
+the minimum relative precision of the operands.
+If u ∈ Z×
+p , a ∈ Zp , and N ≤ N ′ , then we have
+that (u + O(pN ′
+))(a + O(pN )) = ua + O(pN ). Multiplication by p preserves the relative precision and
+increases the absolute precision by 1. The worst operation when it comes to absolute p-adic precision
+is dividing a small number by p. For example, the expression
+(1 + p99 + O(p100 )) − (1 + O(p100 ))
+p100 + O(p200 )
+begins with 3 numbers with an absolute and relative precision of at least 100, and ends with a result
+where not even the constant term is known. Henceforth, by precision we refer to the absolute precision.
+= p−1 + O(1)
+Deﬁnition 2.1.7. Let A, B ∈ Mn (Zp ) be matrices such that ai,j = bi,j + O(pNi,j ). Then we write
+A = B + O(pN ), where N := mini,j Ni,j .
+To refer to a matrix A ∈ Mn (Qp ) whose elements are known at an absolute precision at least N ,
+we will simply write A + O(pN ). The same absolute precision on every entry is called a ﬂat precision.
+2.2. Orthogonality and the Bilinear Lemma. In pnumerical linear algebra, we often need to
+bridge the gap between an approximate computation – usually, where arithmetic is performed in the
+ring Zp/pN Zp – and some information about the true solution to our problem over Zp . For example,
+consider computing the kernel of the following matrix equation
+M x = (cid:20)p3
+0(cid:21) x = 0.
+0
+0
+Over Zp , we see that this matrix plainly has rank 1, and our kernel is given by e2 . However, the kernel
+of M ⊗Zp Zp /pN Zp will always be rank 2 as a Zp /pN Zp -module. Thus, it is helpful to understand the
+properties of kerZp M ⊗Zp Zp /pN Zp to best make sense of the approximate computations. This leads
+us to the concept of p-adic orthogonality as introduced in [Sch06].
+Deﬁnition 2.2.1. A set {x1 , . . . , xr } ⊂ Qn
+p is orthogonal if for every λ1 , . . . , λr ∈ Qp we have that
+We say {x1 , . . . , xr } is orthonormal if it is orthogonal and each kxj k = 1.
+Deﬁnition 2.2.2. A submodule V ⊆ Zn
+p is orthonormal ly generated if it is generated by an orthonor-
+mal set. We also say that V admits an orthogonal basis.
+Note that a subset {x1 , . . . , xr } ⊂ Zn
+p is orthonormal if and only if r ≤ n and there is a U ∈ GLn (Zp )
+such that xj = ej U for all 1 ≤ j ≤ r. Since any two bases of a free Zp -module are related by a
+transformation in GLn (Zp ), we obtain the following basis-free characterizations of the orthonormally
+generated criterion.
+Lemma 2.2.3. Let V be a free Zp -submodule of Zn
+p .
+(a) If V admits an orthonormal basis, then every basis of V is orthonormal.
+(b) We have that V is orthonormal ly generated if and only if the cokernel of the inclusion V ֒→ Zn
+p is
+a free Zp -module.
+We additionally have a notion of orthogonal complement.
+rXj=1
+(cid:13)(cid:13)(cid:13)(cid:13)(cid:13)(cid:13)
+λj xj (cid:13)(cid:13)(cid:13)(cid:13)(cid:13)(cid:13)
+= max {|λj | kxj k : 1 ≤ j ≤ r} .
+6
+AVINASH KULKARNI AND TRISTAN VACCON
+Deﬁnition 2.2.4. Two submodules U, V ⊆ Zn
+p are orthogonal if for some choice of bases {ui , i ∈ I },
+{vj , j ∈ J } the set {ui , i ∈ I } ∪ {vj , j ∈ J } is orthogonal. If V and U are both orthonormally generated
+and Zn
+p = V ⊕ U , we say that U is an orthogonal complement to V (and vice-versa ).
+Given a submodule V ⊆ Zn
+p that is orthonormally generated, it is easy to construct an orthogonal
+complement. Writing a basis for V as the rows of an r × n matrix M , we compute a singular value
+decomposition M = QΣP . Note that Σ has unit entries on the diagonal, as V is orthonormally
+generated, and that the ﬁrst r rows of P generate V as a submodule. Since P ∈ GLn (Zp ), we see
+that the last n − r rows of P generate an orthonormal module orthogonal to V . That being said, the
+orthogonal complement of a non-trivial subspace is never unique.
+A useful result to relate the results of our computations back to results over Zp is the Bilinear
+Lemma of Samuel-Zariski [ZS75, Chapter VIII, Section 7].
+Lemma 2.2.5 (Bilinear Lemma). Let A be a ring, m an ideal in A, and let E , E ′ , F be three A-modules.
+Assume that F is a Hausdorﬀ space for its m-topology and that A is complete. Let f : E × E ′ → F be
+a bilinear mapping, and denote by ¯f : E /mE × E ′/mE ′ → F /mF the canonical ly determined map.
+If we are given y ∈ F, ¯α ∈ E /mE , ¯α′ ∈ E ′ /mE ′ such that ¯f (α, α′ ) = ¯y and F /mF = f ( ¯α, E ′/mE ′ ) +
+f (E /mE , ¯α′). Then there are lifts of α, α′ to E , E ′ such that y = f (α, α′ ).
+We can translate this directly to our situation.
+Lemma 2.2.6 (Bilinear Lemma, specialized). Let m an ideal in Zp . If we are given y ∈ Zn
+p , ¯x ∈
+(Zp /mZp )n , ¯M ∈ Mn (Zp /mZp ) such that ¯x has a unit coordinate and ¯x ¯M = ¯y . Then there is a lift
+x ∈ Zn
+p of ¯x and a lift M ∈ Mn (Zp ) of ¯M such that xM = y .
+Proof. The hypotheses of the general Bilinear Lemma are readily checked.
+(cid:3)
+Finally, we deﬁne the notion of orthogonality, orthonormal, and orthogonal complement for (Zp /pN Zp )n .
+Deﬁnition 2.2.7. Let V be a submodule of (Zp /pN Zp )n . Then V is orthonormal ly generated if the
+cokernel of the inclusion V ֒→ (Zp /pN Zp )n is a free (Zp /pN Zp )-module.
+Deﬁnition 2.2.8. Two submodules U, V ⊆ (Zp /pN Zp )n are orthogonal if for some choice of bases
+{ ¯ui , i ∈ I }, {¯vj , j ∈ J } and any lifts {ui , i ∈ I }, {vj , j ∈ J } to Zn
+p , the set {ui , i ∈ I } ∪ {vj , j ∈ J } is
+orthogonal. If V and U are both orthonormally generated and (Zp /pN Zp )n = V ⊕ U , we say that U
+is an orthogonal complement to V (and vice-versa ).
+2.2.1. pNumerical ranks, kernels, and preimages
+In this section, we deﬁne the pnumerical rank, kernel, and inverse image. We also discuss how to
+compute such ob jects and how they relate to their exact counterparts for a matrix M ∈ Mn (Zp ).
+Deﬁnition 2.2.9. The pnumerical rank of precision O(pN ) of M ∈ Mn (Zp ) is the number of singular
+values of M of norm strictly bigger than p−N (i.e. of valuation strictly smaller than N ).
+Example 2.2.10. For the matrix
+With a suﬃcient amount of precision, the pnumerical rank will be equal to the rank. Additionally,
+the strict QR-factorization will reveal the pnumerical rank of the original matrix as the number of
+non-zero pivots of R. If not enough precision is given, this cannot be guaranteed. The singular value
+decomposition always reveals the pnumerical rank.
+M := 
+p 1
+0 p + O(p3 )
+0 p 1
+0
+we see with Q := 1, R := M that M = QR is a strict QR-factorization. However, because of the low
+precision (|σ∗ (M )| ≤ |p3 |), we can obtain another strict QR-factorization with
+Q′ := 
+p 1 + O(p3 ),
+R′ := 
+0 0 + O(p3 ).
+1
+0 0
+p 1
+0
+1 0
+0 p 1
+−p2
+0
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+7
+We see that the second strict QR-factorization reveals the pnumerical rank, and the ﬁrst does not.
+We now discuss pnumerical kernels and pnumerical inverse images.
+Deﬁnition 2.2.11. Let N > 0. The pnumerical kernel of precision O(pN ) of M ∈ Mn (Zp ) is the
+maximal free (Zp /pN Zp )-submodule of (Zp /pN Zp )n annihilated by M .
+Deﬁnition 2.2.12. Let N > 0. The pnumerical preimage of precision O(pN ) of a submodule V ⊆
+(Zp /pN Zp )n under M ∈ Mn (Zp ) is the the maximal free (Zp /pN Zp )-submodule U ⊆ (Zp /pN Zp )n such
+that M U ⊆ V .
+The pnumerical kernel of M is not generally the kernel of M (mod pN ) as an endomorphism of
+(Zp /pN Zp )n . As expected, the pnumerical kernel is just the pnumerical preimage of 0. Generally, if
+8
+AVINASH KULKARNI AND TRISTAN VACCON
+2.3. The basic QR-algorithm. Algorithm 2.1 below is the simple QR-algorithm given in [Kul20]
+(Algorithm 2.19 loc. cit.). This version suﬀers from a number of drawbacks: the algorithm only
+converges linearly and cannot decompose any block with eigenvalues that are the same modulo p. The
+core idea to improve the algorithm is the classic strategy of concurrently updating the approximation
+to the eigenvalue and the matrix.
+Algorithm 2.1 simple QR Iteration(M , χA,p )
+Input:
+M + O(pN ), an n × n-matrix in Mn (Zp ).
+χM ,p , the characteristic polynomial of M (mod p).
+Output: A (block) triangular form T for M , and a matrix V such that M V = V T + O(pN ) (i.e. V
+is a change of basis matrix between T and M ).
+1: Set λ1 , . . . , λℓ to be the roots of χM ,p in Fp , lifted to Zp .
+2: Set m1 , . . . , mℓ to be the multiplicities of the roots of χA,p .
+3: Compute B , V such that M V = V B and B is in Hessenberg form.
+4: for i = 1, . . . , ℓ do
+for j = 1, . . . , miN do
+Factor (B − λi I ) = QR
+Set B := RQ + λi I
+Set V := Q−1V
+9: return B , V
+6:
+7:
+5:
+8:
+We point out a useful lemma of Wilkinson from [Wil65], which helps in analysing the diagonal
+elements of the various upper triangular factors encountered in the iteration.
+Lemma 2.3.1 (Wilkinson). Let M ∈ Mn (Qp ) be a matrix, let s ≥ 1 be an integer, and let (Q(1) , R(1) ),
+. . ., (Q(s) , R(s) ) be the QR-pairs for s QR-rounds. Let
+M (s) := R(s−1)Q(s−1) , Q(s) := Q(1) · · · Q(s) , R(s) := R(s) · · · R(1) .
+Then M s = Q(s)R(s) and M (s+1) = Q(s)−1
+M Q(s) .
+We quote from [Wil65, Section 5] a brief summary of Wilkinson’s argument to show why QR-
+iteration converges, in a simple case. We refer to Wilkinson’s original article for the other cases. Let
+M ∈ Mn (Zp ) and assume that M = X DX −1 = X DY for D a diagonal matrix with λj := D{j, j } and
+|λ1 | > . . . > |λn | > 0 and let X ∈ GLn (Zp ). We will further assume that X = LX RX and Y = LY RY
+for some LX , LY ∈ GLn (Zp ) unit lower-triangular matrices and RX , RY ∈ GLn (Zp ) upper-triangular.
+Letting (L(1) , R(1) ), . . ., (L(s) , R(s) ) be the QR-pairs for s QR-rounds (with M = L(1)R(1) ), we have
+M s = X DsY = X (DsLY D−s )(DsRY ).
+We write DsLY D−s = I + Fs , and we have
+Fs {i, j } = (LY {i, j } · (cid:16) λi
+0
+By the assumption on the norms of the λj ’s we have that lims→∞ Fs → 0. We have
+λj (cid:17)s
+if i ≤ j.
+if i > j
+X DsY = LX RX (1 + Fs )DsRY
+= LX (I + RX FsR−1
+X )RX DsRY .
+Since Fs → 0 under the iteration, for some suﬃciently large s we have that the QR-factorization of
+(I + RX FsR−1
+X ) is of the form (I + L′ )(I + R′ ) with L′ , R′ lower (resp. upper) triangular and tending
+to 0. In particular, by Wilkinson’s Lemma
+L(s)R(s) = LX (I + L′ )
+(I + R′ )(RX DsRY )
+.
+{z
+}
+|
+{z
+}
+|
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+9
+The left factor is lower triangular and the right factor is upper triangular, so by the uniqueness of
+LR-decompositions of non-singular matrices over a domain, we have that L(s) = LX (I + L′ ). But now
+with M (s) the s-th iterate of M under the QR-iteration we have by Wilkinson’s Lemma
+M (s) = (L(s) )−1M (L(s) )
+= (L(s) )−1X DX −1(L(s) )
+= (I + L′ )−1L−1
+= (I + L′ )−1RX DR−1
+X (I + L′ ).
+Because lims→∞ (I + L′ ) = I , we see the M (s) converge to the upper triangular matrix RX DR−1
+X .
+X LX RX DR−1
+X L−1
+X LX (I + L′ )
+2.4. Problematic examples. Before proceeding with the rest of the article, we include examples
+that highlight some of the technical diﬃculties we need to be aware of in our proofs. First, we review
+an example from [Kul20].
+Example 2.4.1. Consider the matrix
+A := (cid:20)p3
+0 −p3(cid:21) + O(p6 ).
+p2
+The characteristic polynomial computed using capped precision arithmetic is χA + O(p6 ) = T 2 + O(p6 ).
+There is a precision loss in computing the roots of f , and the absolute error on the roots of f cannot
+be better than O(p3 ). However, it is possible to know the characteristic polynomial of A at a higher
+precision; keeping track of extra digits of precision, we have
+χA = (p3 + O(p6 ) − T )(−p3 + O(p6 ) − T ) − (p2 + O(p6 ))(0 + O(p6 ))
+= T 2 − (p3 − p3 + O(p6 ))T + (p6 + O(p9 )) − (O(p8 ))
+= T 2 − (0 + O(p6 ))T + (p6 + O(p8 )).
+With the extra digits of precision on the last coeﬃcient of χA , we can compute the roots of χA with
+an absolute error of O(p4 ). In particular, even when the input has ﬂat precision, there are cases where
+the characteristic polynomial needs to be known at higher precision to obtain the best accuracy on
+the eigenpairs.
+Next, we discuss topologically nilpotent matrices.
+Deﬁnition 2.4.2. We say a matrix M ∈ Mn (Zp ) is topological ly nilpotent if limj→∞ (cid:13)(cid:13)M j (cid:13)(cid:13) = 0.
+For example, any matrix of the form
+0 . . .
+0
+1
+. . .
++ pX, X ∈ Mn (Zp )
+
+
+1
+0
+is topologically nilpotent. Topologically nilpotent matrices generally exhibit the worst-case scenario for
+the computation of the characteristic polynomial or iterative eigenvector algorithms [CRV17, Kul20].
+Practically, either more precision or more iterations are required to compute the generalized eigenspaces
+in these cases. Topologically nilpotent matrices are a particular examples of matrices M ∈ Mn (Qp )
+such that |λ1 − λ2 | < 1 for some eigenvalues λ1 , λ2 of M .
+In the archimedean case, the distances
+between eigenvalues of an input matrix is well-known to be related to the condition number of the
+eigenvalue/eigenvector problem.
+Example 2.4.3 (Topologically nilpotent matrices). Topologically nilpotent blocks present a worst
+case scenario for the convergence of our QR method. Consider the (n + 1) × (n + 1) matrix
+1
+p 0 . . . 0 p
+1
+. . .
+1
+0
+
+
++ O(pN )
+10
+AVINASH KULKARNI AND TRISTAN VACCON
+After n − 1 rounds (resp. n) QR-rounds (with shift 0), we end up with the matrix
++ O(pN ),
+(resp.)
++ O(pN ).
+1
+p 0
+p
+
+. . .
+1
+0 1
+. . .
+1 0
+
+1
+p2
+
+0 . . .
+1
+1
+0 p
+. . .
+1 0
+
+We see that the convergence of the (2, 1)-entry to zero is hampered by the chain of subdiagonal 1’s. If
+λ1 , λ2 are distinct small eigenvalues and gcd(p, n) = 1, we have |λ1 − λ2 | = p− 1
+n , so we do not meet
+the criterion for quadratic convergence. Second, this example suggests even in optimal cases why we
+may need n log2 N iterations for the (2, 1) entry to converge to zero modulo pN ; essentially, we can
+only guarantee that the size of this entry decreases within n iterations.
+Example 2.4.4 (Disordered eigenvalues). Consider the matrix
+
+1 0
+1 1
+p
+1
+3
+p
+p10
+0
+0
+0
+0
+p 1
+1
+2
+p p
+
++ O(pN ).
+It is not immediately clear what the change of coordinates is to ensure that the matrix remains in
+Hessenberg form and for the backward orbit of 0 (mod p) to correspond to the last two (row) vectors.
+The transformation to convert this matrix to a size-sorted Hessenberg matrix appears to be diﬃcult
+to compute.
+There are several ways in which a matrix in Mn (Zp ) can fail to be diagonalized by a GLn (Zp )
+transformation. The ﬁrst is that the matrix is not semi-simple, and the second is that the charac-
+teristic polynomial of M may contain non-trivial irreducible factors. There is a third obstruction to
+diagonalizability whenever the singular values diﬀer from the sizes of the eigenvalues.
+Example 2.4.5 (Non-GLn (Zp )-diagonalizable matrices.). Consider the topologically nilpotent matrix
+M = (cid:20)p 1
+0 0(cid:21) .
+We see that M is in Schur form and that the eigenvalues are {0, p}. It is impossible to diagonalize M
+over GLn (Zp ), as GLn (Zp ) conjugation preserves the singular values, which in this case are {0, 1}.
+3. Computing size-sorted forms and generalized 0-eigenspaces
+In this section, we study the connection between size-sorted forms of a matrix and approximations
+to the generalized 0-eigenspace. We ﬁrst present a reﬁnement of the Hodge-Newton decomposition
+from [Ked10, Theorem 4.3.11]. To begin, we give a variant of a classical result.
+Lemma 3.0.1. Let f ∈ Zp [t] be a polynomial, let M ∈ Mn (Zp ), let V := lker f (M ), and let r :=
+rank V . Then V is orthonormal ly generated. Moreover, there exists a U ∈ GLn (Zp ) such that V U −1 =
+hen−r+1 , . . . , en i. In particular,
+U M U −1 = (cid:20)A C
+0 B(cid:21) .
+Proof. Since V is a kernel, it is orthonormally generated and admits an orthogonal complement V ⊥ .
+Representing a basis b1 , . . . , bn−r for V ⊥ and a basis bn−r+1 , . . . , bn for V as row vectors we construct
+U := (cid:2)bT
+.
+By orthogonality we have U ∈ GLn (Zp ) and by deﬁnition U sends hen−r+1 , . . . , eni to V . Finally, M
+commutes with f (M ), so V is an invariant subspace for M . In particular, V M ⊆ V . By the deﬁnition
+of U we have U M U −1 = (cid:20)A C
+0 B(cid:21) as required.
+n (cid:3)T
+(cid:3)
+· · ·
+bT
+1
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+11
+The lemma above allows us to show that a factorization of χM indicates that M can be put into
+a matching block triangular form by a GLn (Zp ) transformation. We can now prove the ﬁrst theorem
+from the introduction.
+Theorem 3.0.2. Let M ∈ Mn (Zp ) and let χM = f1 · · · fr be a factorization in Zp [t] where the factors
+are pairwise coprime in Qp [t]. Then there exists a U ∈ GLn (Zp ) such that U M U −1 is block-triangular
+with r blocks; the j -th block accounts for the eigenvalues λ such that fj (λ) = 0.
+Proof. Using Lemma 3.0.1 with the polynomial fr , we can ﬁnd a U ∈ GLn (Zp ) such that
+U M U −1 = (cid:20)A C
+0 B(cid:21) .
+Since the fj are pairwise coprime, we have χB = fr . The result follows from an inductive argument. (cid:3)
+Even though a GLn (Zp ) transform can be found to put a matrix into a block Schur form, this does
+not mean a GLn (Zp ) matrix can be found that block diagonalizes the matrix. See Example 2.4.5. If
+f ∈ Zp [t] is a polynomial whose roots have valuations {ν1 , . . . , νR}, there is a factorization f = f1 · · · fr
+where the roots of each fj have valuation νj (see [Ked10, Section 2.2], [GNM, GNP12, CRV16] for more
+details on the factorization of p-adic polynomials, slope factorization and how to compute them). Thus
+we obtain:
+Corollary 3.0.3 (Newton decomposition). Let M ∈ Mn (Zp ) and let ν1 ≤ . . . ≤ νr be the distinct
+valuations of the eigenvalues of M . Then there exists a U ∈ GLn (Zp ) such that U M U −1 is block-
+triangular with r diagonal blocks; the j -th block accounts exactly for the eigenvalues of valuation νj .
+To compute a sorted matrix, we can use the standard algorithm to compute a block Schur form for
+a matrix over Fp . We state this as Algorithm 3.1. Note that a size-sorted form is a 1-digit of precision
+approximation to the Newton decomposition from Corollary 3.0.3.
+Algorithm 3.1 sorted form
+Input:
+An n × n matrix M known at precision O(pN ).
+Output: A sorted form M ′ for M and a matrix U ∈ GLn (Zp ) such that M ′ = U M U −1 .
+1: Set ¯M := M (mod p).
+2: Compute a block Schur form for ¯M with change of basis matrix U ∈ GLn (Fp )
+3: Lift U to GLn (Zp )
+4: Set M ′ := U M U −1
+5: return M ′ , U
+This algorithm is suﬃcient for our purpose of computing the block Schur form. We also see that
+there is a connection between computing the generalized 0-eigenspace at 1 digit of precision and the
+computation of a size-sorted form of a matrix. Consequently, sorted matrices necessarily have a non-
+trivial factorization of their characteristic polynomials.
+Lemma 3.0.4. Let M := (cid:20)A C
+E B(cid:21) be a size-sorted matrix and let ǫ be a positive power of p such that
+E ≡ 0 (mod ǫ). Then there is a factorization χM = χbigχsmall in Zp [t] such that χbig ≡ χA (mod ǫ)
+and χsmall ≡ χB (mod ǫ). Moreover, the factorization χM ≡ χAχB (mod ǫ) into monic polynomials
+is unique in (Zp /ǫZp )[t].
+Proof. Note that χM ≡ χAχB (mod ǫ), and in particular χM ≡ χAχB (mod p). Writing χA,p , χB ,p for
+the reductions of χA , χB modulo p (respectively), we have gcd(χA,p , χB ,p ) = 1 ∈ Zp/pZp . By Hensel’s
+lemma, we have the factorization χM = χbig · χsmall in Zp [t], and moreover, if χM ≡ F G (mod ǫ)
+is a factorization such that F ≡ χbig (mod p) and G ≡ χsmall (mod p), then F ≡ χbig (mod ǫ) and
+G ≡ χsmall (mod ǫ). Thus, we see that χsmall ≡ χB (mod ǫ).
+(cid:3)
+The remainder of this section is devoted to computing the generalized 0-eigenspace of a matrix. This
+oﬀers two possible beneﬁts. First, it allows us to repair the classical algorithm to deal with cases such
+12
+AVINASH KULKARNI AND TRISTAN VACCON
+as Example 3.1.1. Secondly, we can potentially set up the iterative algorithms to block-triangularize
+topologically nilpotent matrices.
+3.1. Computing the generalized 0-eigenspace: Problematic examples. In this section we give
+some examples that demonstrate the diﬃculty of computing the generalized 0-eigenspace.
+Example 3.1.1. Let A := 
+0 + O(p4 ). The schoolbook method to compute the (right sided)
+p2
+0
+1
+0
+generalized 0-eigenspace is to compute ker A2 . Unfortunately, we see that A2 ≡ 0 (mod p4 ), and in
+this case we do not compute the generalized 0-eigenspace correctly.
+Example 3.1.2. In inﬁnite precision, another way to compute the generalized 0-eigenspace is to
+iteratively solve Ax = b, starting with b = 0. The corresponding calculation in ﬁnite precision is a
+little delicate. Consider the matrix
+ ∈ M4 (Zp ).
+We see that the right kernel of A is generated by e4 , and that the generalized 0-eigenspace is he2 , e3 , e4 i.
+Unfortunately, in this case, the solutions in Z4
+p to Ax = e4 are of the form x = p−1 e3 + ue4 , where
+u ∈ Zp . Working with 4-digits of precision, the Zp /p4Zp -submodule of elements such that ¯Ax ∈ h¯e4 i
+is (cid:10)p3 ¯e1 , ¯e3 , ¯e4 (cid:11). This example indicates we need to be careful about what we mean by
+A := 
+p
+0
+0 0
+1
+0 0
+0 p 0
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+13
+an orthogonal complement V ⊥ to V inside Zn
+p and computes an operator M ′ such that M ′ stabilizes
+V ⊥ and the image of M − M ′ is contained in V . In this case, GZE(M ) = GZE(M ′ |V ⊥
+V ⊥ ) ⊕ V . Note that
+an orthogonal complement to V in Zp is given by hei : i 6∈ J i. This is easily seen from the fact that
+the pivots of W occur in the columns indexed by J .
+Lemma 3.2.1. The matrix M ′′ computed on step 9 represents M : Zn
+p /V → Zn
+p /V .
+Proof. First, we ﬁx the basis hei : i 6∈ J i for the choice of orthogonal complement. Note that we have the
+equation M ′ := M − XW . The (left) image of M ′ is contained in hei : i 6∈ J i. In particular, M ′ deﬁnes
+an endomorphism of the subspace hei : i 6∈ J i. The explicit matrix describing this endomorphism on
+Zn
+p /V with respect to the chosen basis is obtained from M ′ by deleting the columns indexed by J .
+This is exactly the matrix M ′′ .
+(cid:3)
+Proposition 3.2.2. Let M ∈ Mn (Zp ) be a matrix given at ﬂat precision O(pN ) and let V0 be the
+generalized left 0-eigenspace of M . Then Algorithm 3.2 computes an approximation at precision O(pN )
+of V0 , in O(n3 dim(V0 )) arithmetic operations at precision O(pN ).
+Proof. From the previous lemma and discussion, it is clear that Algorithm 3.2 is correct when per-
+forming computations at inﬁnite precision. Next, note that the rows of the matrix V computed in
+step 4 are orthonormal, as the rows of V generate the kernel of M as a morphism of Zp -modules.
+Consequently, no divisions by p are needed to compute the reduced row echelon form of V . In the
+elimination on step 8, the pivot entries of W are units, so no divisions by p are needed to perform the
+eliminations. Since J indexes both the pivots of V and a collection of identically 0 columns in ]Vnew ,
+we see that the rows of V and ]Vnew are orthonormal.
+Let eV := h ]Vnew
+V i and let δ := dim(V0 ). By deﬁnition, we see that eV M δ = 0 + O(pN ), so the module
+generated by the rows of eV (mod pN ) is contained in the pnumerical kernel of M δ . On the other hand,
+the rows of eV are orthonormal, so it is easy to see by the exit condition in step 2 that the rows of
+eV (mod pN ) generate the pnumerical kernel of M δ . By Proposition 2.2.14 we see that the rows of eV
+generate V0 (mod pN ).
+Finally, we comment on the computational complexity. The s.v.d computation and the eliminations
+in step 8 can both be done with O(n3 ) arithmetic operations. Steps 5 and 6 can be combined and done
+with O(n3 ) arithmetic operations using the QR-decomposition with column pivoting. The number of
+recursive calls is at most dim V0 . In total, we perform O(n3 dim(V0 )) arithmetic operations.
+(cid:3)
+Remark 3.2.3. The repeated computation of the singular value decomposition in Algorithm 3.2 means
+it is not eﬃcient. Instead of using an s.v.d. decomposition, we can use a QR-decomposition. The
+advantage is that the QR-decomposition for M ′′ can be easily obtained from the QR-decomposition
+for M ; since M ′′ is a rank(ker M )-update of M followed by row/column deletion updates, we can
+use the QR-update algorithm of [GVL13, Section 6.5.1], with Givens rotation replaced by GL2 (Zp )-
+elimination. The QR-update only requires O(n2 ) arithmetic operations when the kernel has rank 1.
+However, the QR-decomposition is only rank revealing given suﬃcient precision (see Example 2.2.10).
+We do not presently know how much precision is needed for this modiﬁcation to work correctly.
+4. The improved QR-iteration
+Our proof of super-linear convergence in the QR-iteration depends on being able to convert the
+matrix to a size-sorted Hessenberg matrix. First, we give the standard Hessenberg algorithm for
+reference.
+For attempting to compute a size-sorted Hessenberg matrix, we make two modiﬁcations to the
+standard Hessenberg algorithm. First, we start from the bottom and proceed upward rather than
+starting from the left and proceeding right. Secondly, we restrict the set of permutations in step 3
+so that the sorted form is preserved. The reason we start from the bottom row in Procedure 4.2 is
+that the procedure is guaranteed to produce a sorted Hessenberg matrix if b = 1. This is because the
+condition in step 4 is vacuously false.
+14
+AVINASH KULKARNI AND TRISTAN VACCON
+Algorithm 4.1 standard hessenberg
+Input:
+M + O(pN ), an n × n-matrix over Zp .
+Output: A Hessenberg form H for M and a U ∈ GLn (Zp ) such that H U = U M + O(pN )
+1: Set U := I
+2: for j = 1, . . . , n − 1 do
+Find the minimal i ∈ {j + 1, . . . , n} such that |M {i, j }| is maximal
+Permute row j + 1 and row i in M . Permute row j + 1 and row i in U
+if M {j + 1, j } 6= 0 then
+Set U {i, j } := −M {i, j }/M {j + 1, j } for j + 2 ≤ i ≤ n
+Compute U M by using row j + 1 to eliminate each M {i, j } for j + 2 ≤ i ≤ n
+Compute M U −1 by applying column operations
+9: return M , U
+3:
+4:
+5:
+6:
+7:
+8:
+Procedure 4.2 attempt sorted hessenberg
+3:
+Input:
+M + O(pN ), an n × n size-sorted matrix over Zp .
+The block sizes (a, b) for M .
+Output: A sorted Hessenberg form H for M and a U ∈ GLn (Zp ) such that H U = U M + O(pN )
+1: Set U := I
+2: for i = n, . . . , 2 do
+Find the maximal j ∈ 1, . . . , i − 1 such that |M {i, j }| is maximal
+if j ≤ a and a < i − 1 then
+return Fail, M , U
+Permute column i − 1 and column j in M . Permute column i − 1 and column j in U
+if M {i, i − 1} 6= 0 then
+Set U {i, j } := M {i, j }/M {i, i − 1} for 1 ≤ j ≤ i − 2
+Compute M U −1 by using column i − 1 to eliminate each M {i, j } for 1 ≤ j ≤ i − 2
+Compute U M by applying row operations
+11: return Success, M , U
+7:
+8:
+4:
+5:
+10:
+6:
+9:
+4.1. Super-linear separation. In the case that M := [A; ǫ, B ] is a size-sorted Hessenberg matrix,
+the separating entry ǫ will deﬂate superlinearly to 0 in the QR-iteration. We organize the proof of this
+statement into a sequence of three results.
+A′
+∗
+0 ǫ′
+0
+0
+Lemma 4.1.1. Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix with block sizes (nA , ∗), and
+let µ ∈ ǫ · Zp . Write M − µI = QM RM and B − µI = QB RB . Then QM is block upper triangular
+modulo ǫ. Additional ly, with
+M ′ := RM QM + µI =: 
+ , α := RM {nA + 1, nA + 1},
+we have that |ǫ′ | = |ǫ| · |α| and |α| ≤ max{|ǫ| , |RB {1, 1}|}.
+Proof. Write A − µI = QARA . Then
+(QA ⊕ I )−1 (M − µI ) = 
+Let r = RA{nA , nA} ∈ Zp . Note that |r| = |RA{nA , nA}| ≥ |σ∗ (RA )| = 1 since µ is small and we have
+assumed that all of the small eigenvalues correspond to the block B . So |r| = 1.
+ .
+0
+ǫ
+0 0
+B − µI
+RA
+∗
+B ′
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+15
+The next operation in computing M − µI = QM RM is the elimination of the ǫ entry. The elementary
+row matrix for this step is E := [IA ; −r−1 ǫ, IB ], and the resulting intermediate matrix is
+E · (QA ⊕ I )−1 · (M − µI ) =: [RA ; 0, C ].
+Writing C = QC RC and M − µI = QM RM , we have that
+QM = 
+QA
+∗
+RA
+∗
+ , RM = 
+ .
+0 −r−1 ǫ
+0
+0
+0
+0
+0
+0
+As RC {1, 1} = α and M ′ = RM QM + µI = [A′ ; ǫ′ , B ′ ], then by direct calculation |ǫ′ | = |α| · |ǫ|. On
+the other hand, as C ≡ B mod ǫ (since µ ≡ 0 mod ǫ), we get that |α| ≤ max{|ǫ| , |RB {1, 1}|}, which
+concludes the proof.
+QC
+RC
+(cid:3)
+R(j)
+M , R(1)
+M , R(m)
+Q(m)
+M := Q(1)
+Corollary 4.1.2. Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix with block sizes (∗, m) such
+that kχsmall − tmk ≤ |ǫ|. Then after m QR-rounds, we obtain a matrix M ′ := [A′ ; ǫ′ , B ′ ] with |ǫ′ | ≤ |ǫ|2 .
+Proof. Let χM = χbigχsmall . By Lemma 3.0.4 we have kχB − χsmall k ≤ |ǫ| and by assumption,
+kχsmall − tmk ≤ |ǫ|. Applying the Cayley-Hamilton theorem we then obtain:
+−Bm ≡ χB (B ) − Bm ≡ χsmall (B ) − Bm ≡ 0 (mod ǫ).
+Let (Q(1)
+M ), . . . , (Q(m)
+M ) be the QR-pairs for the m QR-rounds, deﬁne R(j)
+M . Let δ (j) := R(j)
+B {1, 1} for each 1 ≤ j ≤ m and let
+M . . . Q(m)
+M ,
+M . . . R(m)
+M ,
+B . . . R(m)
+B .
+From Wilkinson’s Lemma, Q(m)R(m) = M m and M m ≡ [Am ; 0, Bm ] (mod ǫ). As the R-factors are
+upper triangular, we have (cid:12)(cid:12)(cid:12)Qm
+j=1 δ (j) (cid:12)(cid:12)(cid:12) = (cid:12)(cid:12)(cid:12)R(m)
+B {1, 1}(cid:12)(cid:12)(cid:12) ≤ |ǫ| . By applying Lemma 4.1.1 to all of the
+QR-rounds, we have either |ǫ′ | ≤ |ǫ|2 or
+|ǫ′ | ≤ (cid:16)(cid:16)(cid:16)|ǫ| · (cid:12)(cid:12)(cid:12)δ (1) (cid:12)(cid:12)(cid:12)(cid:17) · (cid:12)(cid:12)(cid:12)δ (2) (cid:12)(cid:12)(cid:12)(cid:17) . . .(cid:17) · (cid:12)(cid:12)(cid:12)δ (m) (cid:12)(cid:12)(cid:12) ≤ |ǫ|2 .
+In the proof of Corollary 4.1.2, we only needed that kBm e1k ≤ |ǫ|. Eran Assaf pointed out to us
+that we can compute Bm e1 in M(m) · log2 m operations, and eﬃciently forecast whether m QR-rounds
+will decrease the size of ǫ to |ǫ|2 – here M(m) denotes the number of operations needed to multiply
+two m × m matrices.
+R(m)
+B := R(1)
+R(m)
+M := R(1)
+(cid:3)
+A , R(j)
+B by [RA ; 0, RB ] :=
+Corollary 4.1.3. Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix with block sizes (∗, m) and
+|ǫ| < 1. Let 1 ≤ γ ≤ − logp kχsmall − tmk be a real value. Then after (m⌈log2 logp (γ )⌉) QR-rounds, we
+obtain a size-sorted Hessenberg matrix M ′ := [A′ ; ǫ′ , B ′ ] with |ǫ′ | ≤ p−γ .
+Proof. Straightforward induction.
+(cid:3)
+4.2. Trace shifting. We show how to choose shifts µ such that [A−µI ; ǫ, B −µI ] satisﬁes the condition
+on the size of the small characteristic polynomial, or if it does not, we can prove that two clusters of
+small eigenvalues can be separated modulo ǫ.
+Proposition 4.2.1. Let M := [A; ǫ, B ] be a sorted Hessenberg matrix with block sizes (∗, m) and let
+µ := 1
+m trace(B ). Factor χM (t) = χbigχsmall (with χA , χB equal to χbig , χsmall mod ǫ, respectively).
+If for al l pairs of distinct roots λ1 , λ2 of χsmall , we have |λ1 − λ2 | ≤ |ǫ|, then kχB (t − µ) − tm k ≤ |ǫ|.
+By contraposition, if kχB (t − µ) − tmk > |ǫ|, then there are some distinct roots λ1 , λ2 of χsmall , such
+that |λ1 − λ2 | > |ǫ|.
+Proof. Let K be the ﬁeld of deﬁnition of the eigenvalues of χM with ring of integers OK . Assume that
+for all pairs of distinct roots λ1 , λ2 ∈ OK of χsmall , we have |λ1 − λ2 | ≤ |ǫ|, i.e. λ1 ≡ λ2 mod ǫ. By
+Lemma 3.0.4, we have χB = χsmall mod ǫ, so µ = 1
+m trace(B ) = λ1 mod ǫ. We compute that:
+χsmall (t − µ) ≡ Yi
+≡ tm mod ǫ.
+(t − λi − µ) ,
+16
+AVINASH KULKARNI AND TRISTAN VACCON
+As χB = χsmall mod ǫ, we can conclude that kχB (t − µ) − tmk ≤ |ǫ|.
+(cid:3)
+When p | m, there is a potential ambiguity in choosing the last digits of µ. However, since only
+ﬁnding the common leading digits of the eigenvalues is necessary, we may make some arbitrary choice
+and convergence will be unaﬀected beyond the possibility of accidentally choosing a better shift than
+expected. In the speciﬁc (very common) case that m = 1, we wil l always choose a good shift and the
+precision of ǫ wil l at least double at every step. To clarify what we mean by common, see Remark 1.2.4.
+Based on various experiments, the condition that kχsmall − tmk ≤ |ǫ| is genuinely necessary to
+ensure quadratic convergence. We remark that the converse of Proposition 4.2.1 is false; consider
+M := (cid:20)1; p2 , (cid:20)p
+0 −p(cid:21) + O(p2 )(cid:21)
+0
+We have with ǫ := p2 that χB (t) ≡ (t − p)(t + p) ≡ t2 + O(p2 ), but (−p) 6≡ p (mod p)2 .
+p 6= 2.
+(cid:3)
+Proposition 4.2.2. Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix, let m = nB and let
+λ1 , . . . , λm be the smal l eigenvalues of M . Let µ := 1
+m trace(B ). If η := maxi,j |λi − λj | ≤ |ǫ|, then
+after m QR-rounds with shift µ we obtain a size-sorted Hessenberg matrix [Anext ; ǫnext, Bnext ] such that
+|ǫnext | ≤ (cid:12)(cid:12)ǫ2 (cid:12)(cid:12). After at most (m⌈log2 (− logp η)⌉) rounds, the obtained [Anext ; ǫnext , Bnext ] is such that
+|ǫnext | ≤ η .
+Proof. The result follows from Proposition 4.2.1, Corollary 4.1.2, and Corollary 4.1.3.
+4.3. Further properties of the QR-iteration. In this subsection, we prove some further results
+about the QR-iteration. This section is not necessary to implement our main algorithm, but is in-
+tended to explain some patterns we have observed in computing several examples. Some heuristics are
+supported by these results.
+Separating eigenvalues would be useful to continue converging quickly. The only way we presently
+are aware of doing this is to compute some approximation of the characteristic polynomial. We have
+already seen that low precision approximations, such as χM (mod p), provide a mean to separate the
+eigenvalues. We explain how to eﬃciently approximate some factor of the characteristic polynomial
+during a QR-iteration. Unfortunately, it is possible that this approximation is not suﬃcient to separate
+the roots. If a separation of the roots is detected, then we can continue running the QR-iteration using
+the reﬁned shifts.
+We denote by PM (m) the matrix [e1 M e1 . . . M m−1 e1 ]. If B + O(pN ) ∈ Mn (Zp ) is topologically
+nilpotent, the matrix PB (m) is often not given at a ﬂat absolute precision; the i-th column is actually
+known at absolute precision N − logp (cid:13)(cid:13)B i e1(cid:13)(cid:13). By Wilkinson’s lemma, columns of the matrix PB (m)
+can be cached during a QR-iteration, so the cost of constructing the matrix is negligible.
+Lemma 4.3.1. Let M ∈ Mn (Zp ) be a Hessenberg matrix. Then for al l m ≥ 1, we have that PM (m)
+is upper triangular, and for each 1 ≤ i ≤ n, we have |PM (m){i, i}| ≥ |PM (m){i′ , j ′}| for al l i′ , j ′ ≥ i.
+Proof. Triangularity is obvious. Let α := PM (m){i, i} be a diagonal entry. If |α| = 1 there is nothing
+to do, and if |α| < 1 we have that M i e1 is a Zp -linear span of e1 , M e1 , . . . , M i−1 e1 modulo α. When
+j ′ > n, we have M j ′
+e1 is a span of the columns of PM (n) by the Cayley-Hamilton Theorem.
+(cid:3)
+Corollary 4.3.2. The matrix PM (m) admits a factorization PM (m) = DQM (m), where D is a
+diagonal matrix such that |D{i, i}| ≥ |D{i + 1, i + 1}| and where QM (m) ∈ GLn (Zp ).
+Using Corollary 4.3.2, we can determine an approximation to a factor of χsmall provided that either
+some D{i, i} is very small (in which case, the orbit of e1 is nearly a proper invariant subspace), or
+provided that no D{i, i} is too small (meaning the matrix PA (m) is reasonably well-conditioned). We
+believe that a more precise statement of what we can determine from this approximation to χsmall is
+an interesting problem for future study.
+4.4. The QR-algorithm. We give the fast version of the QR-algorithm, given as Algorithm 4.3.
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+17
+Algorithm 4.3 QR Iteration
+(Fast version)
+Input:
+H + O(pN ), an n × n-matrix over Zp in size-sorted Hessenberg form.
+χH,p , the characteristic polynomial of M (mod p).
+Output: A block triangular form T for H , and matrix V so that H V = V T + O(pN ).
+7:
+8:
+9:
+5:
+6:
+1: Set m to be the multiplicity of 0 in χH,p .
+2: Set [A; ǫ, B ] := H
+3: Set ǫold := 1
+4: while true do
+for j = 1, . . . , m do
+Set µ := m−1 trace(B ). Adjust precision if needed.
+Factor QR := H − µI
+Set H := RQ + µI
+Set [A; ǫ, B ] := H
+Set V := Q−1V
+if |ǫ| > |ǫold |2 then
+return Fail, H , V
+else if ǫ = 0 (mod pN ) then
+return Success, H , V
+else
+Set ǫold := ǫ.
+15:
+16:
+10:
+11:
+12:
+13:
+14:
+Line(s)
+Cost per line (leading term)
+4
+– 5
+– – 7,8, & 10
+Total (main term):
+⌈log2 N ⌉ iterations
+m iterations
+2 n2 + n2
+2n2m⌈log2 N ⌉
+1
+2 n2 + 1
+In parallel
+Table 1. Table of costs for the QR-algorithm.
+Proposition 4.4.1. Let M := [A; ǫ, B ] be a size-sorted Hessenberg matrix, let m = nB and let
+λ1 , . . . , λm be the smal l eigenvalues of M . If η := maxi,j |λi − λj | ≤ |ǫ|, then after m QR-rounds
+we obtain a size-sorted Hessenberg matrix [Anext ; ǫnext , Bnext ] such that |ǫnext | ≤ (cid:12)(cid:12)ǫ2 (cid:12)(cid:12). Each round
+uses 2n2 + o(n2 ) operations of Qp arithmetic. After at most (m⌈log2 (− logp η)⌉) rounds, the obtained
+[Anext ; ǫnext , Bnext ] is such that |ǫnext | < η .
+Proof. The result is obtained by combining Proposition 4.2.2 and tabulating the costs in Table 1. (cid:3)
+5. The main algorithm
+In this section, we describe the main algorithm (Algorithm 5.1) and prove the main theorem. Though
+our main theorem is concerned with matrices whose eigenvalues are all deﬁned in Qp , we introduce
+some terminology to state more precisely how our algorithm performs in general
+Deﬁnition 5.0.1. We say that a matrix is in weak block Schur form if it is block upper triangular
+and for each block B , either the characteristic polynomial of B has no roots in Qp or there is a λ ∈ Qp
+such that B − λI is topologically nilpotent.
+Note that the weak block Schur form can be converted to a block Schur form by applying the
+eigenvector methods [CRV17, Kul20] to the diagonal blocks, and then applying the resulting change
+of basis to the whole matrix. If the characteristic polynomial of M modulo p is square-free and splits
+completely, the weak block Schur form is a Schur form.
+18
+AVINASH KULKARNI AND TRISTAN VACCON
+Algorithm 5.1 Main algorithm
+Input:
+M + O(pN ), an n × n-matrix over Qp .
+Output: A weak block Schur form T for M , and matrix U such that M U = U T + O(pN ).
+1: Set d := kM k, M := d−1 · M
+2: Set M , U := sorted form(M)
+3: Set S to be the block sizes of M
+4: Set retcode, M , U1 := attempt sorted hessenberg(M , S )
+9:
+10:
+11:
+5: Update U := U U1
+6: Compute χM ,p
+7: while M has an eigenvalue deﬁned over Zp do
+Choose µ ∈ Zp such that µ (mod p) is a root of the characteristic polynomial of the bottom-right
+block of M (mod p)
+Apply one QR-round to M with shift µ
+if M − µI (mod p) is a size-sorted Hessenberg matrix then
+8:
+Set retcode2, M , U2 := QR Iteration(M − µI , χM ,p )
+12:
+13:
+14:
+15:
+16:
+Set M := M + µI
+Update U := U U2
+else
+Set retcode := Fail
+if retcode == Fail or retcode2 == Fail then
+17:
+18:
+19:
+Apply a fallback method (we use Algorithm 2.1, and obtain the output M , U3 )
+Update U := U U3
+return M , U
+20: Deﬂate M to be the top-left block (thereby reducing the size of M )
+21: Reset M to be the full-sized matrix
+22: return d · M , U .
+Note that each of the matrix multiplication steps in Algorithm 5.1 can be combined into the pre-
+ceding step, so do not actually contribute to the complexity; we separated out the update steps for
+clarity.
+5.1. Proof of the Main Theorem. We now prove our main theorem on the behaviour of Algo-
+rithm 5.1 in the special case of a matrix with n eigenvalues in Zp that are simple modulo p.
+Theorem 5.1.1. Let M ∈ Mn (Zp ) be a matrix whose entries are known with error O(pN ). If the
+characteristic polynomial of M modulo p is square-free and factors completely then Algorithm 5.1
+computes a Schur form T and a matrix U ∈ GLn (Zp ) such that M U = U T + O(pN ) in at most
+3 n3 log2 N + o(n3 log2 N ) arithmetic operations in Zp at N -digits of precision. In particular, T reveals
+al l the eigenvalues of M with error O(pN ). An additional O(n3 ) arithmetic operations in Qp is then
+enough to compute a Qp -basis of eigenvectors with coeﬃcients in Zp .
+2
+Proof. After step 2, we may assume that our matrix is of the form
+M ≡ 
+A ∗
+· · ·
+B1
+. . .
+∗
+...
+∗
+Br
+
+(mod p),
+where χA (mod p) has no linear factors, and every χBj (t) ≡ (t − λj )mj (mod p) for some λ ∈ Fp . By
+our assumption on χM , we see that the A block is empty and Br is a block of size 1 in M (mod p). We
+see that step 4 will produce a sorted Hessenberg matrix of the form [A; ǫ, br ] and that the condition in
+step 10 is satisﬁed. By Proposition 4.4.1, step 11 will transform M to a matrix of the form [A′ ; 0, λr ].
+Additionally, step 11 will preserve the Hessenberg form.
+SUPER-LINEAR CONVERGENCE IN THE P-ADIC QR-ALGORITHM
+19
+B ′′
+r ′′
+B ′′
+1
+∗
+...
+· · ·
+. . .
+We now look at the deﬂated instance where M ′′ = A′ . Speciﬁcally, we will show that the condition
+in step 10 is satisﬁed. Write
+M ′′ ≡ 
+ (mod p),
+where by deﬁnition the subdiagonal entries of each B ′′
+j are non-zero modulo p. By the assumption on
+χM , we have that χB ′′
+r′′ (mod p) has a simple root ¯µ over Fp . We choose a lift µ ∈ Zp for ¯µ.
+For a Hessenberg matrix H , we have with H = QR a QR-decomposition that |R{i, i}| ≥ |H {i + 1, i}|.
+Thus, after one QR-round with shift µ we have that the bottom row of M ′′ is congruent to 0 modulo
+p. Since ¯µ is a simple root of the characteristic polynomial, we additionally have that M is in sorted
+Hessenberg form. Thus, step 10 succeeds to produce a size-sorted Hessenberg matrix. We now see
+that the algorithm produces a Schur form for M by induction.
+By Proposition 4.4.1, we see that each execution of step 11 consists of log2 (N ) QR-rounds, after
+which the subdiagonal ǫ converges to 0 + O(pN ). The total cost for this is 2n2 log(N ) + o(n2 log(N )).
+Since deﬂation reduces the number of rows/columns of the input matrix by 1, we see repeated appli-
+cations of step 11 require a total of 2
+3 n3 log(N ) + o(n3 log(N )) arithmetic operations in Zp . Finally, to
+compute the eigenvectors, only n triangular systems are to be solved, for a total of O(n3 ) arithmetic
+operations in Qp (there may be some divisions by powers of p).
+(cid:3)
+6. Practicality and Implementation
+In this section, we give some timings for our Julia implementation, available at:
+https://github.com/a- kulkarn/Dory
+Our benchmarking results are listed in Tables 3 and 4. We also include the old timings from [Kul20] for
+the sake of reference (Table 2), however, the updates to the dependencies and the change in hardware
+means the comparison is not pure. Timings are based on random matrices, where each entry is a
+randomly sampled p-adic number in PadicField(p,N ) (more precisely, a uniformly random integer
+in [0, pN − 1]).
+Matrix size (n) Time (s) (power iteration) Time(s) (block schur form) Time (s) (classical)
+10
+0.0029
+0.010
+0.0008
+100
+0.9774
+3.390
+3.2600
+200
+6.7920
+24.2771
+51.2573
+300
+36.0114
+166.4447
+258.0104
+Table 2. Timings from [Kul20]. (Qp := PadicField(7,10))
+Matrix size (n) Time (s) (power iteration) Time(s) (block schur form) Time (s) (classical)
+10
+0.0017
+0.0524
+0.0006
+100
+0.5386
+1.4558
+2.0400
+200
+3.7068
+10.1043
+31.1456
+300
+20.4178
+52.0343
+158.4332
+Table 3. Timings with improved QR. (Qp := PadicField(7,10), simple roots over Fp )
+Timings were conducted by using the time() function. An average of 10 samples were used per
+comparison, with each method receiving the same inputs. We omit from the timings an extra execution
+of each function at the beginning which triggers Julia’s compiler. The code to execute the comparisons
+is found in Dory/test/timings.jl and Dory/test/timings2.jl.
+20
+AVINASH KULKARNI AND TRISTAN VACCON
+Matrix size (n) Time (s) (power iteration) Time(s) (block schur form) Time (s) (classical)
+10
+0.0125
+0.0196
+0.0060
+100
+6.9100
+14.9795
+19.7082
+200
+44.5217
+39.6243
+337.6393
+Table 4. Timings with improved QR, more precision. (Qp := PadicField(41,100))
+Acknowledgements
+The authors would like to thank the mathematics department at TU Kaiserslautern for sponsoring
+the visit of the second author. We would also like to thank Eran Assaf and John Voight for their
+especially insightful comments.
+References
+[BL12] J´er´emy Berthomieu and Romain Lebreton, Relaxed p-adic Hensel lifting for algebraic systems, ISSAC 2012—
+Proceedings of the 37th International Symposium on Symbolic and Algebraic Computation, ACM, New York,
+2012, pp. 59–66, DOI 10.1145/2442829.2442842. MR3206287
+[Car17] Xavier Caruso, Computations with p-adic numbers, Vol. 5, CIRM, 2017 (en).
+[CRV14] Xavier Caruso, David Roe, and Tristan Vaccon, Tracking p-adic precision, LMS Journal of Computation and
+Mathematics 17 (2014), no. A, 274–294.
+, p-adic stability in linear algebra, ISSAC’15—Proceedings of the 2015 ACM International Symposium
+on Symbolic and Algebraic Computation, ACM, New York, 2015, pp. 101–108. MR3388288
+[CRV15]
+[CRV16]
+, Division and Slope Factorization of p-Adic Polynomials, ISSAC’16—Proceedings of the 2016 ACM
+[CRV17]
+International Symposium on Symbolic and Algebraic Computation, ACM, New York, 2016, pp. 159–166.
+, Characteristic polynomials of p-adic matrices, ISSAC’17—Proceedings of the 2017 ACM International
+Symposium on Symbolic and Algebraic Computation, ACM, New York, 2017, pp. 389–396. MR3703711
+[Dix82] John D. Dixon, Exact solution of linear equations using p-adic expansions, Numer. Math. 40 (1982), no. 1,
+137–141, DOI 10.1007/BF01459082. MR681819
+[Ful02] Jason Fulman, Random matrix theory over ﬁnite ﬁelds, Bull. Amer. Math. Soc. (N.S.) 39 (2002), no. 1, 51–85,
+DOI 10.1090/S0273-0979-01-00920-X. MR1864086
+[GVL13] Gene H. Golub and Charles F. Van Loan, Matrix computations, 4th ed., Johns Hopkins Studies in the Math-
+ematical Sciences, Johns Hopkins University Press, Baltimore, MD, 2013. MR3024913
+[GNM] Jordi Gu`ardia, Enric Nart, and Jesus Montes, The Montes project, http: // montesproject. blogspot. com/ .
+[GNP12] Jordi Gu`ardia, Enric Nart, and Sebastian Pauli, Single-factor lifting and factorization of polynomials over
+local ﬁelds, J. Symbolic Comput. 47 (2012), no. 11, 1318–1346, DOI 10.1016/j.jsc.2012.03.001. MR2927133
+[Ked01] Kiran S. Kedlaya, Counting points on hyperel liptic curves using Monsky-Washnitzer cohomology, J. Ramanujan
+[Ked10]
+Math. Soc. 16 (2001), no. 4, 323–338. MR1877805
+, p-adic diﬀerential equations, Cambridge Studies in Advanced Mathematics, vol. 125, Cambridge Uni-
+versity Press, Cambridge, 2010. MR2663480
+[Kul20] Avinash Kulkarni, Solving p-adic polynomial systems via iterative eigenvector algorithms, Linear and Multi-
+linear Algebra 0 (2020), no. 0, 1-22, DOI 10.1080/03081087.2020.1743633.
+[PP95] P. Panayi, Computation of Leopoldt’s p-adic regulator, PhD thesis, University of East Anglia, 1995.
+[Sch06] W. H. Schikhof, Ultrametric calculus, Cambridge Studies in Advanced Mathematics, vol. 4, Cambridge Uni-
+versity Press, Cambridge, 2006. An introduction to p-adic analysis; Reprint of the 1984 original [MR0791759].
+MR2444734
+[Wil65] J. H. Wilkinson, Convergence of the LR, QR, and related algorithms, Comput. J. 8 (1965), 77–84, DOI
+10.1093/comjnl/8.3.273. MR183108
+[ZS75] Oscar Zariski and Pierre Samuel, Commutative algebra. Vol. II, Springer-Verlag, New York-Heidelberg, 1975.
+Reprint of the 1960 edition; Graduate Texts in Mathematics, Vol. 29. MR0389876
+Dartmouth College, Hanover, NH 03755, USA
+E-mail address : avinash.a.kulkarni@dartmouth.edu
+Univ. Limoges, CNRS, XLIM, UMR 7252, F-87000 Limoges, France
+E-mail address : tristan.vaccon@unilim.fr

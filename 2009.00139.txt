@@ -1,0 +1,1126 @@
+0
+2
+0
+2
+g
+u
+A
+1
+3
+]
+A
+N
+.
+h
+t
+a
+m
+[
+1
+v
+9
+3
+1
+0
+0
+.
+9
+0
+0
+2
+:
+v
+i
+X
+r
+a
+A GRADIENT DISCRETISATION METHOD FOR ANISOTROPIC
+REACTION DIFFUSION MODELS WITH APPLICATIONS TO
+THE DYNAMICS OF BRAIN TUMOURS
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Abstract. A gradient discretisation method (GDM) is an abstract setting
+that designs the uniﬁed convergence analysis of several numerical methods for
+partial diﬀerential equations and their corresponding models. In this paper,
+we study the GDM for anisotropic reaction diﬀusion problems, based on a gen-
+eral reaction term, with Neumann and Dirichlet boundary conditions. With
+natural regularity assumptions on the exact solution, the framework enables
+us to provide proof of the existence of weak solutions for the problem, and to
+obtain a uniform–in–time convergence for the discrete solution and a strong
+convergence for its discrete gradient. It also allows us to apply non conform-
+ing numerical schemes to the model on a generic grid; (the Crouzeix–Raviart
+scheme and the hybrid mixed mimetic (HMM) methods). Numerical experi-
+ments using the HMM method are performed to study the growth of glioma
+tumours in heterogeneous brain environment. The dynamics of their highly
+diﬀusive nature is also measured using the fraction anisotropic measure. The
+validity of the HMM is examined further using four diﬀerent mesh types. The
+results indicate that the dynamics of the brain tumour is still captured by the
+HMM scheme, even in the event of a highly heterogeneous anisotropic case
+performed on the mesh with extreme distortions.
+1. Introduction
+In this paper, we study the following anisotropic reaction diﬀusion model:
+(xxx, t) ∈ Ω × (0, T ),
+∂t ¯c(xxx, t) − div (cid:0)A(xxx)∇¯c(xxx, t)(cid:1) = F (¯c(xxx, t)),
+(xxx, t) ∈ ∂Ω × (0, T ),
+∇¯c(xxx, t) · n = 0,
+¯c(·, 0) = cini on Ω.
+With a particular choice of the reaction term F , the model can expresses brain
+tumours, in which unknown ¯c represents the density of cancerous cells, and homo-
+geneous zero ﬂux boundary conditions state that there is no diﬀusion of tumor cells
+out-with the brain region and the domain Ω ⊂ Rd , (d ≥ 1).
+Invasive diﬀuse brain tumors that frequently recur in spite of the improvements
+in therapy plans in recent years, gliomas can often prove fatal within six months to
+a year of recurrence [35, 40]. Treatment plans generally encompass chemotherapy,
+(1.1b)
+(1.1a)
+(1.1c)
+Date : September 2, 2020.
+2010 Mathematics Subject Classiﬁcation. 35K57,65N12,65M08.
+Key words and phrases. A gradient discretisation method (GDM), Gradient schemes, Conver-
+gence analysis, Existence of weak solutions, Anisotropic reaction diﬀusion models, Dirichlet and
+Neumann boundary conditions, Non conforming ﬁnite element methods, Finite volume schemes,
+Hybrid mixed mimetic (HMM) method, Crouzeix–Raviart scheme, Brain tumour dynamics, Frac-
+tional anisotropy.
+1
+2
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+radiotherapy, and surgery, but despite all the advances in these therapies, it is
+still rare for such tumors to be completely cured [31, 36]. A primary problem in
+the treatment of glioma is that they are highly diﬀusive and have heterogeneous
+invasion rates that create invisible antigen tumors that cannot be detected with
+current resolutions of imaging [30, 31, 36]. The heterogeneous spread pattern is
+probably attributable to the anisotropic invasion of glioma cells through the brain’s
+aligned structures, e.g., the bundled neural ﬁber tracts that characterize white
+matter [19, 20, 30]. The brain chieﬂy comprises two forms of tissue, white matter
+and gray matter. Gray matter comprises glial and neuronal cell bodies controlling
+the activity of the brain; white matter is used by glioma cells as an invasion route
+between areas of gray matter [30]. Evidence from research has suggested that within
+white matter tumor diﬀusion is anisotropic, while within gray matter it is isotropic
+[2, 20].
+One means of forecasting the invasive pathways is mathematical modeling, and
+researchers have developed several macroscopic models using diﬀusion tensor imag-
+ing (DTI) data for informing the architecture of white matter and simulating a
+glioma’s non-uniform growth [26, 29]. DTI is a means of imaging that takes mea-
+sures of the way in which water molecules are an-isotropically diﬀused within a
+tissue and could potentially oﬀer predictions of how a tumor will expand and so
+direct therapy planning [3, 28].
+Reaction diﬀusion models have been created in order to forge a link between
+medical imaging and tumor growth models. Tracqui et al.
+[43] suggested one of
+the earliest reaction diﬀusion models that integrated medical imaging information,
+speciﬁcally tumor size and the brain’s geometry. Cruywagen at al [8] expanded on
+this concept and suggested employing two tumor cell populations. Burgess et al.[4]
+extended the model into three dimensions, emphasizing the part played in glioma
+growth by diﬀusion. Many researchers have focused on the macroscopic process
+of glioma expansion, employing reaction diﬀusion type partial diﬀerential equa-
+tions (PDEs), with proliferation represented by the reaction term and inﬁltration
+represented by the diﬀusion term [30].
+The ﬁrst models made an assumption of homogeneous and isotropic growth with
+A set as a constant and scalar diﬀusion; subsequent reaction models have been
+employed for the description of the growth of such tumors within the brain’s het-
+erogeneous environment. One example was Swanson et al.
+[41] who examined a
+spatially heterogeneous diﬀusion coeﬃcient, with A set as being notably greater
+in white matter compared to gray matter for the description of the swifter inva-
+sion noted in these regions. Swanson et al.
+[42] expanded to a three–dimensional
+model, using data regarding gray and white matter areas harvested from anatomi-
+cal imaging. Furthermore, studies of medical images have demonstrated that tumor
+cells have a tendency to follow water diﬀusion patterns; measurement of this can
+be achieved by employing magnetic resonance diﬀusion tensor imaging (MR-DTI).
+Expanding upon tumor cells’ diﬀerential motility within a variety of tissues in such
+a context, numerous researchers have built inhomogenous diﬀusion tensors A in
+order to model tumor cell diﬀusion using images from the diﬀusion tensor (DTI)
+[26, 29, 39]. DTI oﬀers data regarding anisotropic diﬀusion as shown by eigenvalues
+(magnitude) and eigenvectors (direction). The tensors were constructed by em-
+ploying anisotropic (ellipsoid) diﬀusion for white matter, and isotropic (spherical)
+tensors for gray matter [3, 28, 39].
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+3
+While there has been much theoretical study of this model as part of a gen-
+eral theory of reaction diﬀusion equations [37], it is typically very rare to solve
+models that capture the gross behaviour of glioma tumors in heterogeneous brain
+tissue based on data imaging. A number of diﬀerent numerical approaches for the
+description of glioma tumors’ heterogeneous rate of invasion and the dynamics of
+their highly diﬀusive nature (mostly without full convergence analysis) have been
+employed, for example, see [6, 9, 22, 24, 25, 27, 34, 38, 44]. However, few studies have
+so far been paid to the convergence analysis of non conforming methods for the re-
+action diﬀusion equation and its corresponding models. For example, ﬁnite volume
+method is proposed to approximate the convection diﬀusion reaction equations [23]
+and the Nagumo–type equations [45].
+In this work, we develop a gradient discretisation method (GDM) to the model
+(1.1). The (GDM) is a generic framework that can ﬁnd a uniﬁed convergence anal-
+ysis, in which be applicable to multiple families numerical schemes instead of con-
+ducting individual convergence analysis for each numerical scheme. The eﬃciency
+of the framework is ensured under a limited number of properties (depending on
+the model). See the monograph [12] for details. By approximating the model (1.1)
+by the GDM, we aﬀord
+• Comprehensive convergence analysis of numerical schemes for anisotropic
+reaction diﬀusion models.
+• Analysis that carried out based on standard regularity assumptions on the
+data, which can be established in realistic models.
+• Analysis that can be easily extended to the model (1.1) with diﬀerent bound-
+ary conditions.
+• Implementation of ﬁnite volume methods which can be performed on generic
+grids to deal with highly heterogeneous anisotropic problems.
+This paper is organised as follows. Section 2 introduces the discrete elements
+to approximate the considered reaction diﬀusion model together with some basic
+properties to guarantee the convergence of approximation schemes. This is followed
+by Section 3, which is concerned with the approximate scheme and its convergence
+results. Section 4 presents two examples of non conforming schemes that ﬁt into
+the gradient discretisation method and have been not yet proposed to any type of
+anisotropic reaction diﬀusion models; the Crouzeix–Raviart scheme and the hybrid
+mixed mimetic (HMM) methods. They simultaneously provide an approximation
+of the solution and its gradient on a generic grid. In Section 5 we use the com-
+pactness argument to prove our convergence results (Theorem 3.1) under natural
+assumptions on data. This approach relies on establishing energy estimates on
+a discrete solution under standard assumptions on the model data. One beneﬁt
+of our analysis is to prove the existence of a weak solution to (1.1), which does
+not need to be assumed. In Section 6 we show that the GDM can successfully be
+extended to the reaction diﬀusion equations sub ject to non homogeneous Dirich-
+let boundary condition. Finally, in Section 7, some numerical experiments using
+the hybrid mixed mimetic (HMM) method are provided to study the growth of
+brain tumours in heterogeneous environment. The validity of the HMM scheme is
+examined further using anisotropic cases performed on diﬀerent generic meshes.
+4
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+2. Discrete setting
+The idea of the gradient discretisation method is to construct appropriate gra-
+dient discretisations, made of discrete space and operators, to approximate the
+continuous model provided that written in the weak sense. Writing the equivalent
+weak formulation with replacing the continuous elements by the discrete ones yields
+a numerical scheme called a gradient scheme (GS). Let us now start with recalling
+the notions of the gradient discretisation method, that are suitable to discretise par-
+tial diﬀerential equations with homogenous Neumann boundary conditions deﬁned
+as in [12].
+Deﬁnition 2.1 (gradient discretisations). Let Ω be an open subset of Rd (with
+d ≥ 1) and T > 0. A gradient discretisations for the anisotropic reaction diﬀusion
+model (1.1) is D = (XD , ΠD , ∇D , JD , (t(n) )n=0,...,N )), where
+• the set of discrete unknowns XD is a ﬁnite dimensional vector space on R,
+• the linear mapping ΠD : XD → L2 (Ω) is the reconstructed function,
+• the linear mapping ∇D : XD → L2 (Ω)d is a reconstructed gradient, which
+must be chosen such that
+kϕ||D = ||ΠD ϕ||L2 (Ω) + ||∇D ϕ||L2 (Ω)d
+(2.1)
+is a norm on XD ,
+• the linear continuous mapping JD : L2(Ω) → XD is an interpolation oper-
+ator for the initial conditions,
+• t(0) = 0 < t(1) < .... < t(N ) = T are time steps.
+For (ϕ(n) )n∈N ⊂ XD , let us deﬁne the piecewise constant in time functions
+ΠDϕ : (0, T ] → L2(Ω), ∇D ϕ : (0, T ] → L2 (Ω)d ,and δDϕ : (0, T ] → L2 (Ω) as
+follows. For a.e xxx ∈ Ω, for all n ∈ {0, ..., N − 1} and for all t ∈ (t(n) , t(n+1) ],
+ΠD ϕ(xxx, 0) := ΠD ϕ(0) (xxx), ΠDϕ(xxx, t) := ΠD ϕ(n+1) (xxx),
+δDϕ(t) = δ
+ϕ :=
+,
+∇D ϕ(xxx, t) := ∇Dϕ(n+1) (xxx),
+ΠD (ϕ(n+1) − ϕ(n) )
+(n+ 1
+2 )
+D
+δ t(n+ 1
+2 )
+2 ) = t(n+1) − t(n) and δ tD = maxn=0,...,N −1 δ t(n+ 1
+2 ) .
+with setting δ t(n+ 1
+Due to the ﬂexibility of choices of gradient discretisations, various numerical
+scheme families ﬁt into the GDM, starting from conforming, non conforming and
+mixed ﬁnite elements to nodal mimetic ﬁnite diﬀerences and hybrid mimetic mixed
+methods [10, 14–18]. Two examples are presented below and taken from [12].
+Example 2.2. In conforming P1 ﬁnite element method, the discrete space XD
+consists of vectors of values at the nodes of the mesh, the reconstructed operator
+ΠDϕ is the piecewise linear continuous function that takes these values at the nodes,
+and ∇D ϕ = ∇(ΠD ϕ).
+For non conforming P1 ﬁnite element method, the discrete space XD is made
+of piecewise linear functions on a triangle T , which are continuous at the edge
+mid-points. Unlike the conforming methods, the reconstructed operators are re-
+spectively ΠD = I d and ∇D = ∇B (the broken gradient), i.e.,
+for all ϕ ∈ XD , for all a triangle τ ∈ T , ∇B ϕ(xxx) = ∇(ϕ|τ ), ∀xxx ∈ τ .
+As a means of constructing converging schemes, the gradient discretisations el-
+ements must take the properties of continuous space and operators. The quality
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+5
+of the choice of gradient discretisations elements can be measured through two pa-
+rameters, correspond to errors in an interpolation of function by smooth ones and
+a discrete Stokes formula.
+Deﬁnition 2.3 (Consistency). For ϕ ∈ H 1 (Ω), deﬁne SD : H 1 (Ω) → [0, +∞) by
+SD (ϕ) = min
+(2.2)
+w∈XD (cid:0)kΠD w − ϕkL2 (Ω) + k∇D w − ∇ϕkL2 (Ω)d (cid:1) .
+A sequence (Dm )m∈N of gradient discretisations is consistent if, as m → ∞
+• for all ϕ ∈ H 1 (Ω), SDm (ϕ) → 0,
+• for all ϕ ∈ L2 (Ω), ΠDm JDm ϕ → ϕ strongly in L2 (Ω),
+• δ tDm → 0.
+Deﬁnition 2.4 (Limit–conformity). For ψ ∈ Hdiv , deﬁne WD : Hdiv → [0, +∞)
+by
+(∇D w · ψ + ΠD w div(ψ)) dxxx(cid:12)(cid:12)(cid:12)
+where Hdiv = {ψ ∈ L2 (Ω)d : divψ ∈ L2(Ω), ψ · n = 0 on ∂Ω}.
+A sequence (Dm )m∈N of gradient discretisations is limit-conforming if for all
+ψ ∈ Hdiv , WDm (ψ) → 0, as m → ∞.
+Lastly, to address non linearity coming from the reaction term, the operator ΠD
+is required to meet the compactness properties, as outlined below.
+WD (ψ ) = sup
+(cid:12)(cid:12)(cid:12) ZΩ
+,
+(2.3)
+w∈XD \{0}
+||w||D
+Deﬁnition 2.5 (Compactness). A sequence of gradient discretisations (Dm )m∈N
+in the sense of Deﬁnition 2.1 is compact if for any sequence (ϕm )m∈N ∈ XDm , such
+that (||ϕm ||Dm )m∈N is bounded, the sequence (ΠDm ϕm )m∈N is relatively compact
+in L2 (Ω).
+3. Main Results
+As explained before, the GDM relies on the weak formulation. We introduce
+here the weak formulation and its approximation scheme created from the gradient
+discretisations presented in the previous section. We consider the problem (1.1)
+under the following assumptions:
+Ω is an open bounded connected subset of Rd (d ≥ 1) with a Lipschitz boundary,
+(3.1a)
+T > 0, cini ∈ L2 (Ω),
+A : Ω → Md (R) is a measurable function (where Md (R) is the set of d × d matrices)
+and there exists λ, λ > 0 such that for a.e. xxx ∈ Ω,
+(3.1b)
+A(xxx) is symmetric with eigenvalues in [λ, λ],
+F : R → R is a polynomial function, such that F ∈ L2 (Ω × (0, T )),
+and there exists constants CF 1 , CF 2 ≥ 0 such that for any s ∈ R,
+|F (s)| ≤ CF 1 + CF 2 |s|.
+(3.1c)
+− Z T
+0 ZΩ
+0 ZΩ
++ Z T
+¯c(xxx, t)∂t ¯ϕ(xxx, t) dxxx dt − ZΩ
+A(xxx)∇¯c(xxx, t) · ∇ ¯ϕ(xxx, t) dxxx dt
+cini (xxx) ¯ϕ(xxx, 0) dxxx
+(3.2)
+6
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Under assumptions (3.1), ¯c is said to be a weak solution of (1.1) if
+¯c ∈ L2(0, T ; H 1(Ω)) and, for all ¯ϕ ∈ L2 (0, T ; H 1(Ω)),
+such that, ∂t ¯ϕ ∈ L2(Ω × (0, T )) and ¯ϕ(·, T ) = 0,
+0 ZΩ
+F (¯c(xxx, t)) ¯ϕ(xxx, t) dxxx dt.
+= Z T
+Note that this problem can be written in the sense of distributions. Take ¯ϕ ∈
+C∞ (Ω × (0, T )).
+Integration by parts and the density of C∞ ([0, T ]; H 1(Ω)) in
+L2(0, T ; H 1(Ω)), the following holds:
+¯c ∈ L2(0, T ; H 1(Ω))
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+7
+4. 2–Examples covered by the analysis
+The analysis designed in this work can be applicable to many numerical schemes.
+We show here that two diﬀerent non conforming methods can be expressed as the
+gradient schemes formats (3.3). To do so, let us begin by recalling the deﬁnition of
+a generic polyhedral mesh as in [14].
+Deﬁnition 4.1 (Polytopal mesh). Let Ω be a bounded polytopal open subset of
+Rd (d ≥ 1). A polytopal mesh of Ω is given by T = (M, E , P ), where:
+(1) M is a ﬁnite family of non empty connected polytopal open disjoint subsets
+of Ω (the cells) such that Ω = ∪K∈MK . For any K ∈ M, |K | > 0 is the
+measure of K and hK denotes the diameter of K .
+(2) E is a ﬁnite family of disjoint subsets of Ω (the edges of the mesh in 2D, the
+faces in 3D), such that any σ ∈ E is a non empty open subset of a hyperplane
+of Rd and σ ⊂ Ω. We assume that for all K ∈ M there exists a subset EK
+of E such that ∂K = ∪σ∈EK σ . We then set Mσ = {K ∈ M : σ ∈ EK }
+and assume that, for all σ ∈ E , Mσ has exactly one element and σ ⊂ ∂Ω,
+or Mσ has two elements and σ ⊂ Ω. Eint is the set of all interior faces, i.e.
+σ ∈ E such that σ ⊂ Ω, and Eext the set of boundary faces, i.e. σ ∈ E such
+that σ ⊂ ∂Ω. For σ ∈ E , the (d − 1)-dimensional measure of σ is |σ |, the
+centre of mass of σ is xσ , and the diameter of σ is hσ .
+(3) P = (xK )K∈M is a family of points of Ω indexed by M and such that, for
+all K ∈ M, xK ∈ K (xK
+8
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+discretisations satisﬁes the three properties; the consistency, the limit conformity,
+and the compactness. Therefore, Theorem 3.1 provides the convergence of the
+Crouzeix–Raviart scheme for the anisotropic reaction diﬀusion model.
+4.2. The hybrid mixed mimetic (HMM) method. It is found by [13] that the
+HMM method is a framework gathering three diﬀerent schemes: the (mixed-hybrid)
+mimetic ﬁnite diﬀerences methods, the hybrid ﬁnite volume method, and the mixed
+ﬁnite volume methods. The method can also be compatible with a generic mesh
+with non orthogonality assumptions. Let T be a polytopal mesh of Ω deﬁned in
+Deﬁnition 4.1.
+(1) The discrete space is
+XD = {v = ((ϕK )K∈M , (ϕσ )σ∈E ) : ϕK , ϕσ ∈ R, }.
+(2) The non conforming a piecewise aﬃne reconstruction ΠD is deﬁned by
+∀ϕ ∈ XD , ∀K ∈ M, for a.e. xxx ∈ K,
+ΠD ϕ = ϕK on K .
+(3) The reconstructed gradients is piecewise constant on the cells (broken gra-
+dient), deﬁned by
+∀ϕ ∈ XD , ∀K ∈ M, ∀σ ∈ EK ,
+RK (ϕ)nK,σ on DK,σ ,
+√d
+∇D ϕ = ∇K ϕ +
+where a cell–wise constant gradient ∇K (ϕ) and a stabilisation term RK (ϕ)
+are respectively deﬁned by:
+1
+dK,σ
+|σ |ϕσ nK,σ and RK (ϕ) = (ϕσ − ϕK − ∇K ϕ · (xσ − xK ))σ∈EK .
+∇K ϕ =
+|K | Xσ∈EK
+(4) The interpolant JD : L2(Ω) → XD is deﬁned by:
+∀w ∈ L2(Ω) : JD w = ((wK )K∈M , (wσ )σ∈E ),
+w(xxx) dxxx and ∀σ ∈ E , wσ = 0.
+∀K ∈ M, wK =
+The HMM scheme of Problem (3.2) is the gradient scheme (3.3) with the gradient
+discretisations constructed above, it reads
+|K | ZK
+1
+D , such that c(0) = JD cini ,
+and for all n = 0, ..., N − 1, c(n+1) satisﬁes, for all ϕ ∈ XD
+ﬁnd (c(n) )n=0,...,N ∈ X N +1
+XK∈M
+2 ) (cid:16)c(n+1)
+K (cid:17)ϕK + XK∈M
+− c(n)
+δ t(n+ 1
++ XK∈M
+(RK ϕ)T BK RK (c(n+1) ) = XK∈M
+|K |
+K
+|K |A(xxx)∇K c(n+1) · ∇K ϕ
+ϕK ZK
+F (c(n+1)
+) dxxx,
+K
+(4.1)
+where BK is a symmetric positive deﬁnite matrix of size Card(EK ).
+It is proved in [12, Chapter 9] that this gradient discretisations satisﬁes the three
+properties; the consistency, the limit conformity and the compactness. Therefore,
+Theorem 3.1 provides the convergence of the HMM scheme for the anisotropic
+reaction diﬀusion model.
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+9
+The HMM scheme (4.1) can be presented in classical ﬁnite volume formats. With
+considering the linear ﬂuxes c 7→ FK,σ (c) (for K ∈ M and σ ∈ EK ) deﬁned: for all
+K ∈ M and all c, w ∈ XD ,
+|σ |FK,σ (c)(wK − wσ ) = ZK
+Then Problem (4.1) can be written as, for all n = 0, ..., N − 1,
+A(xxx)∇D c · ∇D w dxxx,
+Xσ∈EK
+|σ |FK,σ (u(n+1) ) = ZK
+F (c(n+1)
+K
+) dxxx,
+∀K ∈ M
+|K |
+2 ) (cid:16)c(n+1) − c(n)(cid:17) + Xσ∈EK
+δ t(n+ 1
+FK,σ (c(n+1) ) + FL,σ (c(n+1) ) = 0,
+FK,σ (c(n+1) ) = 0,
+∀σ ∈ Eint with Mσ = {K, L},
+∀K ∈ M , ∀σ ∈ EK such that σ ⊂ ∂Ω.
+5. Proof of The Main Results
+In order to prove our convergence results, the discrete solution and its gradient
+must possess some energy estimates, which are established in the following lemmas.
+Lemma 5.1 (Estimates). Under assumptions (3.1), let D be a gradient discretisa-
+tions and let c ∈ XD be a solution to the gradient scheme (3.3). Then there exists
+a constant C1 ≥ 0 depending only on CF 1 , CF 2 , Ω and ||ΠD c(0) ||L2 (Ω) , such that
+sup
+(5.1)
+t∈[0,T ] ||ΠD c(t)||L2 (Ω) + ||∇D c||L2 (Ω×(0,T ))d ≤ C1 .
+Proof. Take n ∈ {0, ..., N − 1} and ϕ := δ t(n+ 1
+2 ) c(n+1) in Scheme (3.3), to get
+ZΩ (cid:16)ΠD c(n+1) (xxx) − ΠD c(n) (xxx)(cid:17)ΠD c(n+1) (xxx) dxxx + Z t(n+1)
+F (ΠD c(n+1) (xxx))ΠD c(n+1) (xxx) dxxx dt.
+ZΩ
+t(n)
+= Z t(n+1)
+t(n)
+ZΩ
+A(xxx)|∇D c(n+1) (xxx)|2 dxxx dt
+For α, β ∈ R, (α − β )α ≥ 1
+2 (|α|2 − |β |2 ). Applying this inequality to the ﬁrst term
+in the above equality yields
+1
+2 ZΩ h|ΠD c(n+1) (xxx)|2 − |ΠD c(n) (xxx)|2 i dxxx + λ Z t(n+1)
+ZΩ |∇D c(n+1) (xxx)|2 dxxx dt
+F (ΠD c(n+1) (xxx))ΠD c(n+1) (xxx) dxxx dt.
+t(n)
+≤ Z t(n+1)
+t(n)
+ZΩ
+Sum on n = 0, ..., m − 1, for some m = 0, ..., N :
+1
+2 ZΩ h|ΠD c(m) (xxx)|2 − |ΠD c(0) (xxx)|2 i dxxx + λ Z t(m)
+ZΩ |∇D c(xxx)|2 dxxx dt
+F (ΠD c(xxx))ΠD c(xxx) dxxx dt.
+0
+≤ Z t(m)
+0
+ZΩ
+Apply the Cauchy–Schwarz inequality to the right–hand side, to obtain,
+(5.2)
+1
+2 ZΩ h|ΠD c(m) (xxx)|2 − |ΠD c(0) (xxx)|2 i dxxx + λ Z t(m)
+ZΩ |∇D c(xxx)|2 dxxx dt
+0
+≤ ||F ||L2 (Ω×(0,T )) ||ΠD c||L2 (Ω×(0,T )) .
+10
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Due to assumptions (3.1), one has
+1
+2 ZΩ h|ΠD c(m) (xxx)|2 − |ΠD c(0) (xxx)|2 i dxxx + λ Z t(m)
+ZΩ |∇D c(xxx, t)|2 dxxx dt
+Then using the Young’s inequality, with ε satisfying 1
+right–hand side of the above inequality, we have
+0
+≤ C1 ||ΠD c(m) ||L2 (Ω×(0,T )) + C2 ||ΠD c(m) ||2
+L2 (Ω×(0,T )) .
+2 − ε
+2 + CF 2 > 0, to the
+1
+2 ZΩ h|ΠD c(m) (xxx)|2 − |ΠD c(0) (xxx)|2 i dxxx + λ Z t(m)
+ZΩ |∇D c(xxx, t)|2 dxxx dt
+C 2
+ε
++ CF 2 )||ΠD c(m) ||2
+L∞ (0,T ;L2 (Ω)) .
+2ε
+2
+Take the supremum on m = 0, ..., N to conclude Estimate (5.1).
++ (
+≤
+F 1
+0
+(cid:3)
+Corollary 5.2. Let D be a gradient discretisations. Under assumptions (3.1), the
+gradient scheme (3.3) admits at least one solution c ∈ XD .
+Proof. At each time step n+1, (3.3) describes square non linear equations on c(n+1) .
+For a given w ∈ XD , c ∈ XD is a solution to the linear square system
+ΠD
+= ZΩ
+Using arguments similar to the proof of Lemma 5.1, we can obtain
+(xxx)ΠD ϕ(xxx) + ZΩ
+F (ΠD w)ΠD ϕ(xxx) dxxx,
+∀ϕ ∈ XD .
+A(xxx)∇D c(n+1) (xxx) · ∇D ϕ(xxx) dxxx
+c(n+1) − c(n)
+δ t(n+ 1
+2 )
+ZΩ
+(5.3)
+||ΠD c(n+1) ||L2 (Ω) + ||∇D c(n+1) ||L2 (Ω)d ≤ C ||F ||L2 (Ω) + ||ΠD c(n) ||L2 (Ω) .
+where C not depending on c(n+1) . This shows that the kernel of the matrix built
+from the linear system only has the zero vector. The matrix is therefore invertible.
+We then can deﬁne the mapping T : XD → XD by T (w) = c with c is the solution
+to (5.3). Since T is continuous, Brouwer’s ﬁxed point establishes the existence of a
+solution c(n+1) to the system at time step n + 1.
+(cid:3)
+To reach the standard compactness, we need to establish a bound on the discrete
+time derivative. The space ΠD (XD ) ⊂ L2 (Ω) is therefore equipped with a dual norm
+deﬁned as follows.
+Deﬁnition 5.3 (Dual norm on ΠD (XD )). Let D be a gradient discretisations. The
+dual norm || · ||⋆,D on ΠD (XD ) is deﬁned by
+∀w ∈ ΠD (XD ), ||w||⋆,D = sup n ZΩ
+w(xxx)ΠD ϕ(xxx) dxxx : ϕ ∈ XD , ||ϕ||D = 1o. (5.4)
+Lemma 5.4 (Estimate on the dual norm of δD c). Assume (3.1) holds and let D
+be a gradient discretisations. If c ∈ XD is a solution to the gradient scheme (3.3),
+then there exists a constant C2 depending only on C1 , CF 1 , CF 2 and ||ΠD c(0) ||L2 (Ω) ,
+such that
+||δD c(t)||2
+where the dual norm || · ||⋆,D is deﬁned by (5.4).
+0
+⋆,D dt ≤ C2 ,
+Z T
+(5.5)
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+11
+Proof. Take ϕ = w in (3.3). Use the Cauchy–Schwarz inequality to get, thanks to
+assumptions (3.1)
+ZΩ
+(n+ 1
+2 )
+D
+δ
+c(xxx)ΠD w(xxx) dxxx
+≤ λ||∇D c(n+1) ||L2 (Ω×(0,T ))d ||∇D w||L2 (Ω×(0,T ))d
++ (cid:16)CF 1 + CF 2 ||ΠD c(n+1) ||L2 (Ω×(0,T ))(cid:17)||ΠD w||L2 (Ω)
+≤ ||w||D (cid:16)λ||∇D c(n+1) ||L2 (Ω×(0,T ))d + CF 1 + CF 2 ||ΠD c(n+1) ||L2 (Ω×(0,T ))(cid:17).
+The conclusion then follows from taking the supremum over w ∈ XD with ||w||D =
+1, multiplying by δ t(n+1) , summing over n = 0, ..., N − 1 and Estimate (5.1).
+(cid:3)
+Proof of Theorem 3.1. The proof relies on the compactness arguments as in [12],
+and is divided into four stages.
+Step 1: Compactness results. Given that Estimate (5.1) and the two prop-
+erties of the gradient discretisations (consistency and the limit–conformity), [12,
+Lemma 4.8] shows that there exists ¯c ∈ L2 (0, T ; H 1(Ω)), such that, up to a sub-
+sequence, ΠDm cm → ¯c weakly in L2(0, T , L2(Ω)), and ∇Dm cm → ∇¯c weakly in
+L2(0, T , L2(Ω)d ). Estimate (5.5) together with the consistency, limit–conformity
+and compactness, [12, Theorem 4.14] proves that, in fact, the convergence of ΠDm cm
+to ¯c is strong in L2 (Ω × (0, T )).
+Step 2: Convergence of the scheme. We show that ¯c mentioned in the
+ﬁrst step is solution to the continuous problem. Take ¯ψ ∈ L2(0, T ; L2(Ω)) such
+that ∂t ¯ψ ∈ L2 (Ω × (0, T )) and ¯ψ(T , ·) = 0. The interpolation results in [12,
+Lemma 4.10] provides wm = (w(n)
+, such that ΠDm wm → ¯ψ in
+L2(0, T ; L2(Ω)) and δDm wm → ∂t ¯ψ strongly in L2 (Ω × (0, T )). Set ψ = δ t
+as a test function in Scheme (3.3) and sum on n = 0, ..., Nm − 1 to get
+m )n=0,...,Nm ∈ X Nm+1
+w(n)
+(n+ 1
+2 )
+Dm
+m
+m
+Nm−1Xn=0 ZΩ
+[ΠDm c(n+1)
+m
+(xxx) − ΠDm c(n) (xxx)]ΠDm w(n)
+m (xxx) dx
++ Z T
+= Z T
+Apply the discrete integration by part formula [12, Eq. (D.15)] to the right hand
+side in the above equality and use the fact w(N ) = 0 to obtain
+A(xxx)∇Dm cm (xxx, t) · ∇Dm wm (xxx, t) dxxx dt
+0 ZΩ
+0 ZΩ
+F (ΠDm c(xxx, t))ΠDm wm (xxx, t) dx dt.
+(5.6)
+− Z T
+0 ZΩ
+ΠDm cm (xxx, t)δDm wm (xxx, t) dxxx dt − ZΩ
+A(xxx)∇Dm cm (xxx, t) · ∇Dm wm (xxx, t) dxxx dt
+m (xxx)ΠDm w(0)
+m (xxx) dxxx
+ΠDm c(0)
+F (ΠDm c(xxx, t))ΠDm wm (xxx, t) dx dt.
++ Z T
+= Z T
+0 ZΩ
+0 ZΩ
+12
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+ΠDm c(0)
+Thanks to the strong convergence of ΠDm cm and (3.1), the dominated convergence
+theorem implies that F (ΠDm cm ) → F (¯c) in L2 (Ω × (0, T )). By the consistency,
+m = ΠDm JDm cini → cini in L2(Ω). Now, we can pass to the limit m → ∞
+in each of the terms above to see that ¯c is a solution to (3.2), thanks again to the
+weak and strong convergence established previously.
+Step 3: Convergence of ΠDm cm in L∞ (0, T ; L2(Ω)). For s ∈ [0, T ], let (sm )m∈N ⊂
+[0, T ] be a sequence such that sm → s, as m → ∞. Let k(m) ∈ {0, ..., Nm − 1} such
+that sm ∈ (t(k(m)) , t(k(m)+1) ]. As followed in the proof of Lemma 5.1, we obtain as
+the discrete estimate (5.2) with Dm and km ,
+2 ZΩ
+1
+(ΠDm c(xxx, sm ))2 dxxx
+2 ZΩ
+1
+(ΠDm JDm cini (xxx))2 dx − Z t(k(m))
+0
+ZΩ
+≤
+A(xxx)(∇Dm c(xxx, t))2 dxxx dt
+(5.7)
+≤ Z t(k(m))
+0
+ZΩ
+F (ΠDm c(xxx, t))ΠDm c(xxx, t) dxxx dt.
+Let χI be the characteristic function of I . Now, as m → ∞, we have
+ΠDm cm → ¯c strongly in L2 (Ω × (0, T )), and,
+χ[0,t(k(m)) ]∇¯c → χ[0,s]∇¯c strongly in L2(Ω × (0, T ))d .
+It is obvious to write
+Z s
+0 ZΩ
+A(xxx)(∇¯c(xxx, t))2 dxxx dt
+= Z t(k(m))
+ZΩ
+χ[0,s]A(xxx)(∇¯c(xxx, t))2 dxxx dt
+= lim
+≤ lim inf
+χ[0,t(k(m)) ]A(xxx)∇¯c(xxx, t) · ∇Dm cm (xxx, t) dxxx dt
+m→∞ Z T
+0
+0 ZΩ
+m→∞ (cid:16)||χ[0,t(k(m)) ]∇¯c||L2 (Ω×(0,T ))d · ||χ[0,t(k(m)) ]A(xxx)∇Dm cm ||L2 (Ω×(0,T ))d (cid:17)
+= ||χ[0,s]∇¯c||L2 (Ω×(0,T ))d · lim inf
+m→∞ ||χ[0,t(k(m)) ]A(xxx)∇Dm cm ||L2 (Ω×(0,T ))d .
+0 ZΩ
+A(xxx)(∇¯c(xxx, t))2 dxxx dt
+Dividing by kχ[0,s]∇¯ckL2 (Ω×(0,T ))d leads to
+Z s
+(5.8)
+A(xxx)(∇Dm um(xxx, t))2 dxxx dt.
+m→∞ Z t(k(m))
+ZΩ
+≤ lim inf
+Combined with passing to limit superior in (5.7), this gives
+1
+2 ZΩ
+lim sup
+m→∞
+0
+(ΠDm cm (xxx, sm ))2 dxxx
+cini (xxx)2 dxxx − Z s
+F (¯c(xxx, t))¯c(xxx, t) dxxx dt.
+0 ZΩ
+≤
+2 ZΩ
+1
++ Z s
+0 ZΩ
+A(xxx)(∇ ¯u(xxx, t))2 dxxx dt
+(5.9)
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+13
+Plugging ϕ = ¯cχ[0,s] (t) in Problem (3.2) and integrating by part, one has
+2 ZΩ
+1
+(¯c(xxx, s))2 dxxx + Z s
+0 ZΩ
+2 ZΩ
+1
+Putting it all together ((5.9), (5.10)), we have
+=
+A(xxx)(∇¯c(xxx, t))2 dxxx dt
+cini (xxx)2 dxxx + Z s
+0 ZΩ
+F (¯c(xxx, t))¯c(xxx, t) dxxx dt.
+(5.10)
+m→∞ ZΩ
+lim sup
+(ΠDm cm (xxx, sm ))2 dxxx ≤ ZΩ
+¯c(xxx, s)2 dxxx.
+(5.11)
+[12, Theorem 4.19] and Estimates (5.1) and (5.5) states that (ΠDm cm )m∈N con-
+verges to ¯c weakly in L2 (Ω) uniformly in [0, T ]. Hence, ΠDm cm (·, sm ) converges
+to ¯c(·, s) weakly in L2 (Ω), as m → ∞. Estimate (5.11) with basic justiﬁcations
+in Hilbert, this convergence strongly holds in L2(Ω). Since ¯c : [0, T ] → L2 (Ω) is
+continuous, apply [12, Lemma C.13] to conclude the proof.
+Step 4: Strong Convergence of ∇Dm cm . Since the non linearity does not act
+on gradients, the proof can be obtained as in [1] without additional assumptions.
+It can be written
+Z T
+0 ZΩ
+= Z T
+(∇Dm cm (xxx, t) − ∇¯c(xxx, t)) · (∇Dm cm (xxx, t) − ∇¯c(xxx, t)) dxxx dt
+0 ZΩ ∇Dm cm (xxx, t) · ∇Dm cm (xxx, t) dxxx dt
+0 ZΩ ∇Dm cm (xxx, t) · ∇¯c(xxx, t) dxxx dt
+0 ZΩ ∇¯c(xxx, t) · (∇Dm cm (xxx, t) − ∇¯c(xxx, t)) dxxx dt.
+− Z T
+− Z T
+(5.12)
+Take ¯ϕ := cm in Scheme (3.3). We can pass to the limit superior, to obtain, thanks
+to choosing ϕ = ¯c in (3.2) and A(xxx) = Id in the continuous and discrete problems
+lim sup
+m→∞ Z T
+0 ZΩ ∇Dm cm (xxx, t) · ∇Dm cm (xxx, t) dx dt
+F (¯c)¯c(xxx, t) dxxx dt − Z T
+0 ZΩ ∇¯c(xxx, t) · ∇¯c(xxx, t) dxxx dt.
+= Z T
+= Z T
+This relation and the weak convergence of ∇Dm cm enable to pass to the limit in
+(5.12) to complete the proof.
+∂t ¯c(xxx, t)¯c(xxx, t) dxxx dt
+0 ZΩ
+0 ZΩ
+6. The Case Of non homogenous Dirichlet boundary condition
+6.1. Continuous Setting. Anisotropic reaction diﬀusion equations with non ho-
+mogenous Dirichlet boundary conditions have various applications appearing in
+nerve conduction, biophysics, ecology and clinical medicine [45], for example. We
+14
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+(6.1a)
+(6.1b)
+¯c(xxx, t) = g (xxx, t) on ∂Ω × (0, T ),
+consider here the following model:
+∂t ¯c − div (cid:0)A(xxx, t)∇¯c(cid:1) = F (¯c) in Ω × (0, T ),
+¯c(·, 0) = cini on Ω,
+where Ω, F and cini are as in Section 3. The diﬀusion tensor A(xxx, t) is positive
+deﬁnite and g is a trace of a function in L2(0, T ; H 1(Ω)) whose time derivative is
+in L2 (0, T ; H −1(Ω)).
+Take w ∈ L2(0, T ; H 1(Ω)) such that the trace of w is the function g . The weak
+solution of (6.1) is seeking ˆc = ¯c − w satisfying
+0 (Ω))
+(6.1c)
+bc ∈ L2(0, T ; H 1
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+15
+sup
+w∈XD,0 \{0}
+WD (ψ) =
+(cid:12)(cid:12)(cid:12) ZΩ
+Deﬁnition 6.3 (Limit–conformity). For ψ ∈ H div , deﬁne WD : H div → [0, +∞)
+by
+(∇D w · ψ + ΠD w div(ψ )) dxxx(cid:12)(cid:12)(cid:12)
+where H div = {ψ ∈ L2(Ω)d : divψ ∈ L2 (Ω)}.
+A sequence (Dm )m∈N of gradient discretisations in the sense of Deﬁnition 6.1 is
+limit-conforming if for all ψ ∈ H div , WDm (ψ ) → 0, as m → ∞.
+Deﬁnition 6.4 (Compactness). A sequence of gradient discretisations (Dm )m∈N
+in the sense of Deﬁnition 6.1 is compact if for any sequence (ϕm )m∈N ∈ XDm , such
+that (||ϕm ||Dm )m∈N is bounded, the sequence (ΠDm ϕm )m∈N is relatively compact
+in L2 (Ω).
+||w||D
+(6.4)
+.
+If D is a gradient discretisations in the sense of Deﬁnition (6.1), the corresponding
+gradient scheme is given by
+δ
+ZΩ
+(n+ 1
+2 )
+D
+D ,0 , c(0) = JD cini ,
+and for all n = 0, ..., N − 1, c(n+1) satisﬁes
+ﬁnd a family (c(n) )n=0,...,N ∈ ID ,∂ g + X N +1
+c(xxx)ΠD ϕ(xxx) + ZΩ
+A(xxx, t)∇D c(n+1) (xxx) · ∇D ϕ(xxx) dxxx
+F (ΠD c(n+1) (xxx))ΠD ϕ(xxx) dxxx,
+∀ϕ ∈ XD ,0 .
+= ZΩ
+Theorem 6.5. Let assumptions (3.1) hold and let (Dm )m∈N be a sequence of gradi-
+ent discretisations in the sense of Deﬁnition 6.1, that is consistent, limit-conforming
+and compact in the sense of Deﬁnition 6.2, 6.3 and 6.4. For m ∈ N, let cm be a so-
+lution to the gradient scheme (6.5) with D = Dm . Then there exists a weak solution
+bc of (6.2) and a subsequence of gradient discretisations, stil l denoted by (Dm )m∈N ,
+such that, as m → ∞,
+sup
+(6.6a)
+(6.5)
+We can simply establish Estimates (5.1) and (5.5) with c is a solution to (6.5)
+and D is a gradient discretisations in the sense of Deﬁnition of 6.1. Therefore,
+the proof of the above theorem can exactly be handled as the one of Theorem 3.1.
+Remark that the matches of [12, Lemma 4.8] is the following results that can be
+proved as [12, Lemma 3.21].
+Lemma 6.6. Let (Dm )m∈N be a sequence of gradient discretisations in the sense
+of Deﬁnition 6.1 which is consistent and limit-conforming in the sense of Deﬁni-
+tions 6.2 and 6.3. Let cm ∈ X Nm+1
+be such that cm − IDm ,∂ g ∈ X Nm+1
+and
+(||∇Dm cm ||L2 (0,T ;L2 (Ω)d ) )m∈N is bounded. Then, there exists c ∈ L2 (0, T ; H 1(Ω))
+(which is of trace equals g on ∂Ω), and, up to a subsequence, ΠDm cm → c weakly
+in L2 (0, T ; L2(Ω)) and ∇Dm um → ∇c weakly in L2 (0, T ; L2(Ω))d .
+D ,0
+Dm
+t∈[0,T ] kΠDm cm (t) − bc(t)kL2 (Ω) → 0,
+||∇Dm cm − ∇bc||L2 (Ω×(0,T ))d → 0.
+(6.6b)
+16
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+The HMM scheme for (6.2) is the gradient scheme (6.5) coming from the following
+constructed gradient discretisations.
+XD ,0 = {ϕ = ((ϕK )K∈M , (ϕσ )σ∈E ) : ϕK ∈ R, ϕσ ∈ R, ϕσ = 0 for all σ ∈ Eext},
+XD ,∂Ω = {ϕ = ((ϕK )K∈M , (ϕσ )σ∈E ) : ϕσ ∈ R, ϕK = 0 for all K ∈ M,
+ϕσ = 0 for all σ ∈ Eint}.
+The interpolant ID ,∂ : H
+2 (∂Ω) → XD ,∂Ω is deﬁned by
+1
+2 (∂Ω) : (ID ,∂ g )σ =
+g (x) ds(x), for all σ ∈ Eext .
+The remaining discrete mappings ΠD , ∇D and JD are as in Section 4.2.
+The Crouzeix–Raviart scheme for (6.2) is the gradient scheme (6.5) coming from
+the following constructed gradient discretisations.
+|σ | Zσ
+1
+∀g ∈ H
+1
+(6.7)
+XD ,0 = {ϕ = (vσ )σ∈E : ϕK ∈ R, ϕσ = 0 for all σ ∈ Eext},
+XD ,∂Ω = {ϕ = (ϕσ )σ∈E : ϕσ ∈ R, ϕσ = 0 for all σ ∈ Eint}.
+The interpolant ID ,∂ is deﬁned as in (6.7). The remaining discrete mappings ΠD ,
+∇D and JD are deﬁned as in Section 4.1.
+It is proved in [12, Chapter 9] that
+the gradient discretisations of the case of non homogeneous Dirichlet boundary
+conditions satisfy the three properties; the consistency, the limit conformity and
+the compactness. Therefore, Theorem 6.5 provides the convergence of the HMM
+and Crouzeix–Raviart schemes for the problem (6.2).
+7. Numerical results
+We employ the HMM method presented previously to model how a brain tumor
+invades an anisotropic environment, as simulated by the macroscopic reaction dif-
+fusion model (1.1), where ¯c represents the density of cancerous cells at a given time,
+t, and brain location, xxx = (x, y ), which belongs to the square domain Ω = [−L, L]2 ,
+with non-ﬂux boundary conditions. The forward Euler method is utilized for the
+time-discretization, incorporating the use of time step δ t. In accordance with [5],
+we utilize the initial data, incorporating several distorted Gaussian functions that
+are focused on a range of points chosen as
+¯c(xxx, 0) = 0.8 exp(−0.1(x − 1)2 − 0.3(y − 3)2 )
++ 0.75 exp(−0.25(x − 10)2 − 0.15(y + 9)2 )
++ 0.6 exp(−0.2(x + 3)2 − 0.5(y + 4)2 )
++ 0.5 exp(−0.25(x + 5)2 − 0.3(y − 1)2 ).
+7.1. Description of the underlying model.
+(7.1)
+7.1.1. The diﬀusion term. Returning to the reaction model (1.1), anisotropic dif-
+fusion A has a speciﬁc symmetric and positive deﬁnite matrix and is regarded as
+being in direct proportion to the measured water diﬀusion tensor (DT ) harvested
+by DTI data [32, 33]. DT details water molecule diﬀusion employing a Gaussian
+model. For a.e. xxx ∈ Ω ⊂ R2 , DT can be represented by [32]
+DT (xxx) = λ1φ1φT
+1 + λ2φ2φT
+2 ,
+(7.2)
+the non negative λ1 and λ2 are the eigenvalues of A(xxx), and φ1 and φ2 are (orthog-
+onal and normalised) eigenvectors corresponding to λ1 and λ2 respectively. The
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+17
+axis of dominating anisotropy is indicated by the eigenvector φ1 and the degree
+of anisotropy is determined by the eigenvalue size [32, 33]. For a.e. xxx ∈ Ω ⊂ R2 ,
+computing the diﬀusion tensor A(xxx) from (7.2) is then given as [32]
+r2
+µ
+I2 (M (xxx))
+I0 (M (xxx))
+I2 (M (xxx))
+I0 (M (xxx))
+A(xxx) =
+((δ + (1 − δ)(1 −
+))I + 2(1 − δ)
+For the details of computations, we refer the reader to [33]. A is divided into
+isotropic (the I term) and anisotropic components; the anisotropy points in the
+direction ±φ1 . These terms’ relative sizes are dictated by δ and the function M
+[32]. The function M details the concentration levels surrounding the dominant
+direction, for a.e. xxx ∈ Ω ⊂ R2 , it is represented by [32]
+(7.3)
+φ1φT
+1 ).
+M (xxx) = κFanis (DT (xxx)),
+(7.4)
+where κ being a proportionality constant denoting how sensitive the cells are to
+directional data within the environment; Fanis represents fractional anisotropy, the
+most commonly employed measure for anisotropy. For a.e. xxx ∈ Ω ⊂ R2 , the
+fractional anisotropy deﬁned as [32]:
+Fanis (DT (xxx)) = |λ1 − λ2 |
+pλ2
+1 + λ2
+2
+.
+(7.5)
+We can think of this as representing the diﬀerence between a perfect sphere and
+the ellipsoid form of the tensor [32]. The function Ij denotes the modiﬁed Bessel
+function of ﬁrst kind of order j . The constants µ and r respectively represent a
+tumor cell’s turning rate and constant average speed [32, 33]. The diﬀusion tensor
+A in our model is thus taken here to be an anisotropic informed by DTI diﬀusion
+tensor (DT ) given by (7.3) and DT is chosen as [32]
+0.5 + d(x, y )(cid:19) ,
+0
+0
+where d(x, y ) = 0.25 exp(−0.05x2) − 0.25 exp(−0.5y 2) and with parameters are
+chosen as δ = 0.05, r = 1 and µ = 0.
+DT (xxx) = (cid:18)0.5 − d(x, y )
+(7.6)
+7.1.2. The reaction term. With the proliferation term F (¯c) that details a popu-
+lation of tumor cells’ growth, the ma jority of researchers have regarded it as a
+quadratic function that may be exponential: F (¯c) = ρ¯c with constant prolifer-
+ation rate ρ, illustrating that cellular division is obedient to a cycle, or logistic:
+F (¯c) = ρ¯c(1 − ¯c) with a decrease in ρ, the proliferation parameter, for zones of high
+cellular density. Nevertheless, in this research, following [5], cell growth is modeled
+with a cubic behavior so that the inﬂuence of the threshold of cancer cell density
+can be captured, something that is ignored when a quadratic function is employed.
+The threshold is a local driver of normal tissue for cancer cell regimes or will not
+permit cancer cells to colonize tissues, keeping it free of tumors, and this is an
+important factor to consider. Thus we consider a reaction term of [5, 38]:
+F (¯c) = ρ¯c(1 − ¯c)(¯c − α),
+where 0 < α < 1 represents the cancer generation threshold.
+In our work, this
+threshold was ﬁxed as α = 0.1 with a rate of proliferation of ρ = 1. This is the
+standard measurement used in bistable equation models, as highlighted in [5].
+18
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+7.2. Tumour growth evolution. We subsequently use simulation of (1.1) to as-
+sess the impact that the anisotropic environment has on the spatio-temporal evo-
+lution of the glioma tumor at various measurements of κ. The study is performed
+in the context of a 2D squared domain Ω = [−20, 20]2 that incorporates a uniform
+mesh that consists of 3584 triangular elements, that are taken at diﬀerent times,
+denoted by T = 0.2, T = 5, T = 15 and T = 20. The results of simulations are
+shown in Fig. 7.1, Fig. 7.2, Fig. 7.3 and Fig. 7.4 for κ = 0, κ = 5, κ = 10 and
+κ = 30, respectively. In the case of the isotropic case (κ = 0), the outcomes of
+the HMM approach are aligned with the ﬁndings outlined in [5]. We expanded the
+research to include the time considerations for the invasion rate in an anisotropic
+environment, as depicted in Fig. 7.2, Fig. 7.3 and Fig. 7.4. The ﬁgures show
+the density of cancerous cells as a function of time indicating by color-map that is
+displayed on the ﬁgures, which spans from the lowest density, blue (¯c = 0), to the
+highest density, red (¯c = 1). The simulation commences from a relatively irregular
+inhomogeneous initial data (7.1). As time passes, there is a tendency for some of
+the regions of cancer to reduce in density. However, by T = 20, the colonization
+of one of the peaked populations is observed. The way in which these cancer cells
+are diﬀused in a heterogeneous environment within the brain is also taken into
+consideration. The isotropic case, κ = 0, can be observed in Fig7.1. In this case,
+the tumour cells are equally diﬀused in a myriad of directions and exhibit spher-
+ical symmetry. When κ is enhanced from zero the eﬀect that the environmental
+anisotropy has on cell turning increases and an increasingly non-uniform invasion
+is observed, as can be seen in Fig. 7.2 for κ = 5 , Fig. 7.3 for κ = 10 and Fig. 7.4
+for κ = 30. For instance, at T = 20, with κ = 0 a circular invasion can be observed.
+This becomes increasingly irregular in shape when κ = 30. The outcome of this is
+a distinct disparity between the anisotropic and isotropic cases. As can be clearly
+seen, the HMM simulations results, in terms of the expansion of the brain tumours,
+are consistent with the results in [32].
+7.3. Measure of diﬀusion anisotropy. Researchers have recommended a range
+of eigenvalue-based formulae for the purposes of measuring the anisotropy in the
+diﬀusion tensor; for example, the fractional anisotropy (Fanis ) measure outlined in
+(7.5). Fanis was named such due to the fact that it measures the anisotropic fraction
+of the diﬀusion. This measure can be perceived as representative of the variation
+between a perfect sphere and the ellipsoid form of the tensor. To investigate this
+point in more depth, in Fig. 7.5 we plot the histogram of Fanis for A under (a)
+κ = 0, (b) κ = 5, (c) κ = 10 and (d) κ = 30 at the time T = 10. Other parameters
+are set as in Fig. 7.1. Fanis is normalized to attain values in [0, 1] with Fanis = 0
+corresponding to the isotropic case as in (a) for κ = 0 and Fanis = 1 denoting a
+completely anisotropic case as clearly observed in (d) for κ = 30. Moreover, the
+maximum value of the Fanis increases from around of 0.6 to approximately 0.8 as
+the parameter κ is increased from κ = 5 to κ = 10. This demonstrates that there
+is a strong dependency on the κ anisotropy enhancement parameter.
+7.4. Anisotropy under diﬀerent Meshes. The most robust feature of the HMM
+approach is that it can be employed on multiple forms of meshes in a variety of
+space dimensions, with relatively limited limitations on the control volumes, see the
+numerical tests described by [21]. We applied the HMM approach to our anisotropic
+reaction diﬀusion model for four diﬀerent types of meshes, presented in Fig. 7.7 for
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+19
+κ = 0 and in Fig. 7.8 for κ = 100 at time T = 2. Other parameters are chosen as in
+Fig. 7.1. The ﬁrst two types (a and b) were constructed on a triangular mesh that
+included 3584 cells, and on a rectangular mesh that included 1024 control volumes.
+The third type was constructed on hexagonal cells, with the number of cells equal to
+6561. The fourth type of mesh was inspired by Kershowa [21] and it includes 4624
+control volumes. While this form of mesh is associated with intense distortions,
+the dynamics of the brain tumor is still captured by the HMM scheme, even in
+the event of a highly heterogeneous anisotropic case; for example, that presented
+in Fig. 7.8 for κ = 100.
+Figure 7.1. Isotropic case with κ = 0 , propagation of brain
+tumour at diﬀerent time levels: T = 0.2, T = 5, T = 15 and
+T = 20.
+References
+[1] Y. Alnashri and J. Droniou, Gradient schemes for an obstacle problem, in Finite Volumes
+for Complex Applications VII-Methods and Theoretical Aspects, J. Fuhrmann, M. Ohlberger,
+and C. Rohde, eds., vol. 77, Springer International Publishing, 2014, pp. 67–75.
+[2] R. Bammer, A. Burak, and M. Moseley, In vivo MR tractography using diﬀusion imaging,
+European Journal of Radiology, 45 (2002), pp. 223–234.
+20
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Figure 7.2. Anisotropic case with κ = 5 , propagation of brain
+tumour at diﬀerent time levels: T = 0.2, T = 5, T = 15 and
+T = 20.
+[3] P. J. Basser, J. Mattiello, and D. LeBihan, MR diﬀusion tensor spectroscopy and imag-
+ing, Biophysical Journal, 66 (1994), pp. 259–267.
+[4] P. Burgess, P. Kulesa, J. Murray, and J. E. Alvord, The interaction of growth rates
+and diﬀusion coeﬃcients in a three-dimensional mathematical model of gliomas, Journal of
+Neuropathy and Experimental Neurology, 56 (1997), pp. 704–713.
+[5] C. Cherubini, A. Gizzi1, M. Bertolaso, V. Tambone, and S. Filippi, A bistable ﬁeld
+model of cancer dynamics, Communications in Computational Physics, 11 (2012), pp. 1–18.
+[6] O. Clatz, P.-Y. Bondiau, H. Delingette, M. Sermesant, S. K. Warfield, G. Ma-
+landain, and N. Ayacher, Brain tumor growth simulation, tech. rep., INRIA, 2004.
+[7] Crouzeix, M. and Raviart, P.-A., Conforming and nonconforming ﬁnite element methods
+for solving the stationary stokes equations i, R.A.I.R.O., 7 (1973), pp. 33–75.
+[8] G. Cruywagen, D. Woodward, P. Tracqui, G. Bartoo, J. Murray, and J. E. Alvord,
+The modeling of diﬀusive tumours, Journal of Biological Systems, 3 (1995), pp. 937–945.
+[9] K. Das, R. Singh, and S. C. Mishra, Numerical analysis for determination of the presence
+of a tumor and estimation of its size and location in a tissue, Journal of Thermal Biology,
+38 (2013), pp. 32–40.
+[10] J. Droniou and R. Eymard, Uniform-in-time convergence of numerical methods for non-
+linear degenerate parabolic equations, Numer. Math., 132 (2016), pp. 721–766.
+[11] J. Droniou, R. Eymard, and P. Feron, Gradient Schemes for Stokes problem, IMA Journal
+of Numerical Analysis, 36 (2015), pp. 1636–1669.
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+21
+Figure 7.3. Anisotropic case with κ = 10 , propagation of brain
+tumour at diﬀerent time levels: T = 0.2, T = 5, T = 15 and
+T = 20.
+[12] J. Droniou, R. Eymard, T. Gallou¨et, C. Guichard, and R. Herbin, The gradient dis-
+cretisation method, Mathematics & Applications, Springer, Heidelberg, 2018.
+[13] J. Droniou, R. Eymard, T. Gallou¨et, and R. Herbin, A uniﬁed approach to mimetic ﬁnite
+[14]
+diﬀerence, hybrid ﬁnite volume and mixed ﬁnite volume methodss, Mathematical Models and
+Methods in Applied Sciences, 20 (2010), pp. 265–295.
+, Gradient schemes: a generic framework for the discretisation of linear, nonlinear
+and nonlocal el liptic and parabolic problems, Mathematical Models and Methods in Applied
+Sciences, 23 (2013), pp. 2395–2432.
+[15] J. Droniou, R. Eymard, and R. Herbin, Gradient schemes: generic tools for the numerical
+analysis of diﬀusion equations, M2AN Math. Model. Numer. Anal., 50 (2016), pp. 749–781.
+[16] R. Eymard, P. Feron, T. Gallou¨et, R. Herbin, and C. Guichard, Gradient schemes for
+the Stefan problem, International Journal On Finite Volumes, 10s (2013).
+[17] R. Eymard, C. Guichard, and R. Herbin, Smal l-stencil 3D schemes for diﬀusive ﬂows in
+porous media, ESAIM. Mathematical Modelling and Numerical Analysis, 46 (2012), pp. 265–
+290.
+[18] R. Eymard, C. Guichard, R. Herbin, and R. Masson, Gradient schemes for two-phase
+ﬂow in heterogeneous porous media and Richards equation, ZAMM Z. Angew. Math. Mech.,
+94 (2014), pp. 560–585.
+22
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Figure 7.4. Anisotropic case with κ = 30 , propagation of brain
+tumour at diﬀerent time levels: T = 0.2, T = 5, T = 15 and
+T = 20.
+[19] A. Giese, R. Bjerkvig, M. Berens, and M. Westphal, Cost of migration:
+invasion of
+malignant gliomas and implications for treatment, Journal of Clinical Oncology, 21 (2003),
+pp. 1624–1636.
+[20] A. Giese, L. Kluwe, B. Laube, H. Meissner, M. E. Berens, and M. Westphal, Migration
+of human glioma cel ls on myelin, Neurosurgery, 38 (1996), pp. 755–764.
+[21] R. Herbin and F. Hubert, Benchmark on discretization schemes for anisotropic diﬀusion
+problems on general grids, in Finite volumes for complex applications V, ISTE, London, 2008,
+pp. 659–692.
+[22] T. Hines, Mathematical ly modeling the mass-eﬀect of invasive brain tumor, SIAM Under-
+graduate Research Online, 74 (2010), pp. 684–700.
+[23] M. Ibrahim and M. Saad, On the eﬃcacy of a control volume ﬁnite element method for the
+capture of patterns for a volume-ﬁl ling chemotaxis model, Computers and Mathematics with
+Applications, 68 (2014), pp. 1032 – 1051. BIOMATH 2013.
+[24] R. Jaroudi, G. Baravdish, B. T. Johansson, and F. strm, Numerical reconstruction of
+brain tumours, Inverse Proplems in Science and Engineering, 27 (2018), pp. 278–298.
+[25] R. Jaroudi, F. strm, B. Johansson, and G. Baravdish, Numerical simulations in 3-
+dimensions of reaction diﬀusion models for brain tumour growth, International Journal of
+Computer Mathematics, DOI: 10.1080/00207160.2019.1613526 (2019), pp. 1–19.
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+23
+Figure 7.5. Histogram of fractional anisotropy of the domain cells
+under diﬀerent values of κ at time t = 10.
+[26] A. Jbabdi, E. Mandonnet, H. Duau, L. Capelle, K. Swanson, M. P. Issac, R. Guillevin,
+and H. Benali, Simulation of anisotropic growth of low-grade gliomas using diusion tensor
+imaging, Magnetic Resonance in Medicine, 54 (2005), pp. 616–624.
+[27] X. Li and W. Huang, A study on non negativity preservation in ﬁnite element approximation
+of nagumo-type nonlinear diﬀerential equations, Applied Mathematics and Computation, 309
+(2017), pp. 49 – 67.
+[28] S. Mori, Introduction to diﬀusion tensor imaging, Elsevier, 2007.
+[29] P. Mosayebi, D. Cobzas, A. Murtha, and M. Jagersand, Tumor invasion margin on the
+riemannian space of brain ﬁbers, Medical Image Analysis, 16 (2011), pp. 361–373.
+[30] J. D. Murray, Mathematical Biology II: Spatial Models and Biomedical Application,
+Springer, 2004.
+[31] A. Norden and P. Wen, Glioma therapy in adults, Neurol, 12 (2006), pp. 279–292.
+[32] K. Painter and T. Hillen, Mathematical model ling of glioma growth: The use of diﬀusion
+tensor imaging (DTI) data to predict the anisotropic pathways of cancer invasion, Journal
+of Theoretical Biology, 323 (2013), pp. 25–39.
+, Transport and anisotropic diﬀusion models for movement in oriented habitats, in
+Dispersal, individual movement and spatial ecology: A mathematical perspective, M. Lewis,
+P. Maini, and S. Petrovskii, eds., 2013.
+[33]
+[34] E. M. Rutter, T. L. Stepien, B. J. Anderies, J. D. Plasencia, E. C. Woolf, A. C.
+Scheck, G. H. Turner, Q. Liu, D. Frakes, V. Kodibagkar, Y. Kuang, M. C. Preul,
+and E. J. Kostelich, Mathematical analysis of glioma growth in a murine model, Scientiﬁc
+Reports, 7 (2017), pp. 1–16.
+[35] A. H. V. Schapira, Neurology and Clinical Neuroscience, Elsevier, Philadelphia, 2007.
+24
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Figure 7.6. Samples of the various 2D meshes
+[36] N. Shigesada and K. Kawasaki, Biological Invasions: Theory and Practice, Oxford, 1997.
+[37] J. Smoller, Shock Waves and Reaction–Diﬀusion Equations, Springer, 1983.
+[38] S. H. Strogatz, Nonlinear Dynamics and Chaos: with Applications to Physics, Biology,
+Chemistry and Engineering, Westview Press, 2001.
+[39] P. Sundgren, Q. Dong, D. Gomez-Hassan, S. Mukherji, P. Maly, and R. Welsh, Diﬀu-
+sion tensor imaging of the brain: review of clinical applications, Neuroradiology, 46 (2004),
+pp. 339–350.
+[40] K. Swanson, E. Alvord, and J. Murray, Virtual brain tumours (gliomas) enhance the
+reality of medical imaging and highlight inadequacies of current therapy, British Journal of
+Cancer, 86 (2002), pp. 14–18.
+[41] K. Swanson, J. E. Alvord, and J. Murray, A quantitative model for diﬀerential motility
+of gliomas in grey and white matter, Cell Proliferation, 33 (2000), pp. 317–329.
+, Virtual brain tumours (gliomas) enhance the reality of medical imaging and highlight
+inadequacies of current therapy, British Journal of Cancer, 86 (2002), pp. 14–18.
+[42]
+[43] P. Tracqui, G. Cruywagen, D. Woodward, G. Bartooll, J. Murray, and J. E. Alvord,
+A mathematical model of glioma growth:
+the eﬀect of chemotherapy on spatio-temporal
+growth, Cell Proliferation, 28 (1995), pp. 17–31.
+ANALYSIS OF SCHEMES FOR ANISOTROPIC REACTION DIFFUSION MODELS
+25
+Figure 7.7. Isotropic case with κ = 0 , simulation of brain tu-
+mour at t = 2 and on diﬀerent types of meshes.
+[44] X. Zeng, M. A. Saleh, and J. P. Tian, On ﬁnite volume discretization of inﬁltration
+dynamics in tumor growth models, Advances in Computational Mathematics, 45 (2019),
+pp. 3057–3094.
+[45] H. Zhou, Z. Sheng, and G. Yuan, Positivity preserving ﬁnite volume scheme for the
+nagumo-type equations on distorted meshes, Applied Mathematics and Computation, 336
+(2018), pp. 182 – 192.
+(Yahya Alnashri) Department of Mathematics, Al-Qunfudah University College, Umm
+Al-Qura University, Saudi Arabia
+E-mail address : yanashri@uqu.edu.sa
+(Hasan Alzubaidi) Department of Mathematics, Al-Qunfudah University College, Umm
+Al-Qura University, Saudi Arabia
+E-mail address : hmzubaidi@uqu.edu.sa
+26
+YAHYA ALNASHRI AND HASAN ALZUBAIDI
+Figure 7.8. Anisotropic case with κ = 100 , simulation of brain
+tumour at t = 2 and on diﬀerent types of meshes.
