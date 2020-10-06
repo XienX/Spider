@@ -11,7 +11,7 @@ import spider
 import pdf2txt
 
 if __name__ == '__main__':
-    urlHead = 'https://arxiv.org'
+    # urlHead = 'https://arxiv.org'
     # url = 'https://arxiv.org/pdf/2009.00001.pdf'
     response = urllib.request.urlopen('https://arxiv.org/list/cs/2009?skip=25&show=25', timeout=15)
     # html = response.read()
@@ -24,10 +24,10 @@ if __name__ == '__main__':
     #     for data in datalist:
     #         fp.write(data + '\n')
 
-    for data in datalist:
-        url = urlHead + data + '.pdf'
-        print('url:' + url)
-        file_path = spider.get_pdf(url)
+    for data in datalist:  # data格式：/pdf/2009.00110
+        # url = urlHead + data + '.pdf'
+        # print('url:' + url)
+        file_path = spider.get_pdf(data)
         pdf2txt.parse(file_path)
 
     # file_path = spider.get_pdf(url)

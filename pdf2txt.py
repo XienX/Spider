@@ -66,6 +66,8 @@ def parse(_path):
                     results = out.get_text()
                     f.write(results)
                     # print("results: " + results)
+        f.close()
+    fp.close()
 
 
 if __name__ == '__main__':
