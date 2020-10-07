@@ -1,7 +1,7 @@
 # 项目相关  
 ## 配置信息  
 >python3.7  
->第三方库 pdfminer3k  
+>第三方库 pdfminer3k、retrying  
 
 ## 文件信息  
 >main.py 项目启动入口  
@@ -11,8 +11,8 @@
 # 配置步骤  
 
 ### 1.确保有python环境（3.7或以上）  
-### 2.安装pdfminer3k库  
+### 2.安装第三方库  
 >在命令行输入pip install pdfminer3k  
-
+>在命令行输入pip install retrying
 ### 3.在Windows下配置定时任务  
 

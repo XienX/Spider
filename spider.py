@@ -1,5 +1,7 @@
 import urllib.request
 import random
+from retrying import retry
+import datetime
 
 urlHead = 'https://arxiv.org'
 user_agent = ['Mozilla/5.0 (Windows NT 10.0; WOW64)', 'Mozilla/5.0 (Windows NT 6.3; WOW64)',
@@ -26,15 +28,16 @@ user_agent = ['Mozilla/5.0 (Windows NT 10.0; WOW64)', 'Mozilla/5.0 (Windows NT 6
               'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/3.0 Safari/536.11']
 
 
+# 两次retry之间等待1到5秒，重试5次
+#@retry(stop_max_attempt_number=5, wait_random_min=1000,wait_random_max=5000)
 def get_pdf(pdfNum):
     _url = urlHead + pdfNum + '.pdf'
     file_name = _url.split("/")[-1]
-    # u = urllib.request.urlopen(url，headers={'User-Agent': random.choice(user_agent)})
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " downloading " + file_name)
     req = urllib.request.Request(url=_url, headers={'User-Agent': random.choice(user_agent)})  # 随机从user_agent列表中抽取一个元素
     u = urllib.request.urlopen(req)
 
     f = open(file_name, 'wb')
-    print("downloading" + " " + file_name)
     block_sz = 8192
     while True:
         buffer = u.read(block_sz)
@@ -42,20 +45,8 @@ def get_pdf(pdfNum):
             break
         f.write(buffer)
     f.close()
-    print("Successful to download" + " " + file_name)
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "Successful to download " + file_name)
     return file_name
-
-    # 向指定的url地址发送请求，并返回服务器响应的类文件对象
-    # response = urllib.request.urlopen('https://arxiv.org/list/cs/2009?skip=0&show=25')
-
-    # 服务器返回的类文件对象支持python文件对象的操作方法
-    # read()方法就是读取文件里的全部内容，返回字符串
-    # html = response.read()
-    # print(html)
-
-    # fileObject = open("test.txt", "wb")
-    # fileObject.write(html)
-    # fileObject.close()
 
 
 if __name__ == '__main__':

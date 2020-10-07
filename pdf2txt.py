@@ -4,6 +4,7 @@ from pdfminer.layout import LTTextBoxHorizontal, LAParams
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfinterp import PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFParser, PDFDocument
+import datetime
 
 
 # import logging
@@ -65,8 +66,8 @@ def parse(_path):
                 if isinstance(out, LTTextBoxHorizontal):
                     results = out.get_text()
                     f.write(results)
-                    # print("results: " + results)
         f.close()
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' + _path + " successful to txt")
     fp.close()
 
 
