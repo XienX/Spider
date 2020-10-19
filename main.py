@@ -1,6 +1,7 @@
 # 爬虫入口
 # XieXin
 # 2020/10
+
 # https://arxiv.org/
 # https://arxiv.org/multi?group=grp_cs&%2Fform=Form+Interface
 # https://arxiv.org/list/cs/2009?skip=0&show=25
@@ -80,7 +81,7 @@ def main():
             all_pdf = 0
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' {year_month} 论文数: {all_pdf}')
 
-        all_pdf = 50  # 测试用
+        # all_pdf = 50  # 测试用
         # 取pdf编号入pdf_num_queue
         num = 0
         while num < all_pdf:
