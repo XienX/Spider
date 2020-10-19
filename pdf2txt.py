@@ -1,35 +1,55 @@
-# import urllib.request
+# pdf转txt
+
+import os
+import shutil
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTTextBoxHorizontal, LAParams
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfinterp import PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFParser, PDFDocument
+from pdfminer.psparser import PSException
 import datetime
 import logging
 
 logging.getLogger().setLevel(logging.ERROR)
 
 
-def pdf_to_txt(pdf_num_queue, pdf_path_queue, total):
+def pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path):
     succeed = 0
     failed = 0
     re_download = set()  # 要求重新下载文件集合
-    max_pdf = ''
 
     while succeed + failed < total:
-        pdf_path = pdf_path_queue.get()
-        parse(pdf_path)  # 需要异常处理，下次做
-        succeed += 1
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f' [{succeed}/{total}] {pdf_path} successful to txt')
-        if pdf_path > max_pdf:
-            max_pdf = pdf_path
+        pdf = pdf_file_queue.get()
+        if pdf == '*':
+            failed += 1
+        else:
+            try:
+                parse(pdf, txt_path)
+            except PSException:
+                if pdf in re_download:
+                    re_download.remove(pdf)
+                    print(f'[{pdf} 再次打开失败，放弃]')
+                    failed += 1
+                else:
+                    print(f'[{pdf} 打开失败]')
+                    pdf_num_queue.put(pdf[-14:-4])
+                    re_download.add(pdf)
+            else:
+                succeed += 1
+                if pdf in re_download:
+                    re_download.remove(pdf)
 
-    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f' 处理完成，共计{total}个下载任务，成功{succeed}个')
-    return max_pdf
+            os.remove(pdf)
+
+        print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' pdf to txt [{succeed}/{total} succeed, {failed}/{total} failed]')
+
+    print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' 完成，共计{total}个下载任务，成功{succeed}个，失败{failed}个')
+    shutil.rmtree(temp_path)
 
 
-def parse(_path):
-    fp = open(_path, 'rb')
+def parse(pdf, txt_path):
+    fp = open(pdf, 'rb')
 
     # 用文件对象来创建一个pdf文档分析器
     parser_pdf = PDFParser(fp)
@@ -49,7 +69,7 @@ def parse(_path):
     if not doc.is_extractable:
         raise PDFTextExtractionNotAllowed
     else:
-        f = open(_path.replace("pdf", "txt"), 'w', encoding='utf-8')
+        f = open(txt_path + pdf[-15:-4] + '.txt', 'w', encoding='utf-8')
         # 创建PDf资源管理器 来管理共享资源
         rsrcmgr = PDFResourceManager()
 
@@ -84,6 +104,7 @@ def parse(_path):
 
 
 if __name__ == '__main__':
-    print('test_example: path = 2009.00001.pdf')
-    path = '2009.00001.pdf'
-    parse(path)
+    print('pdf2txt test')
+    pdf_name = r'D:\EnglishSynonymRecommendation\data\2009.00001.pdf'
+    path = r'D:\EnglishSynonymRecommendation\data'
+    parse(pdf_name, path)
