@@ -51,7 +51,7 @@ def get_all(year_month):  # 获取此月CS总论文数
 def add_pdf(pdf_num_queue, year_month, skip):  # 根据传入的skip，将此页的pdf编号放入pdf_num_queue
     # print(f'{year_month} {skip}')
     # response = urllib.request.urlopen('https://arxiv.org/list/cs/2009?skip=50&show=25', timeout=30)
-    req = urllib.request.Request(url=f'https://arxiv.org/list/cs/{year_month}?skip={skip}&show=50',
+    req = urllib.request.Request(url=f'https://arxiv.org/list/cs/{year_month}?skip={skip}&show=100',
                                  headers={'User-Agent': random.choice(user_agent)})
     response = urllib.request.urlopen(req, timeout=30)
     html = response.read().decode('utf-8')
@@ -75,8 +75,17 @@ def get_pdf(pdf_num_queue, pdf_file_queue, data_path):  # 下载pdf的线程
         except(urllib.error.URLError, OSError) as e:  # 链接打开异常处理
             print(f'[{_url} 网页打开失败]', end=" ")
             print(e)
-            os.remove(file_name)
             pdf_file_queue.put('*')
+
+            try:
+                if os.path.exists(file_name):
+                    os.remove(file_name)
+            except Exception as e:
+                print('未知错误', end=" ")
+                print(e)
+        except Exception as e:
+            print('未知错误', end=" ")
+            print(e)
         else:
             print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " Successful to download " + file_name)
             pdf_file_queue.put(file_name)
@@ -91,14 +100,14 @@ def download(file_name, _url):  # 根据url下载pdf
     req = urllib.request.Request(url=_url, headers={'User-Agent': random.choice(user_agent)})
     # with urllib.request.urlopen(req, timeout=600) as u:
     u = urllib.request.urlopen(req, timeout=60)
-    f = open(file_name, 'wb')
-    block_sz = 8192
-    while True:
-        buffer = u.read(block_sz)
-        if not buffer:
-            break
-        f.write(buffer)
-    f.close()
+    with open(file_name, 'wb') as f:
+        block_sz = 8192
+        while True:
+            buffer = u.read(block_sz)
+            if not buffer:
+                break
+            f.write(buffer)
+    u.close()
 
 
 if __name__ == '__main__':

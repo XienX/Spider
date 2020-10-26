@@ -21,7 +21,7 @@ import pdf2txt
 
 filePath = r'D:\EnglishSynonymRecommendation\data'  # 在此配置文件放置位置
 dataProcessJar = r'D:\EnglishSynonymRecommendation\EngLishLearner\out\artifacts\DataProcessing_jar\DataProcessing.jar'  # 在此配置数据处理程序
-thread_num = 50  # 在此配置爬虫线程数
+thread_num = 100  # 在此配置爬虫线程数
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
             all_pdf = 0
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' {year_month} 论文数: {all_pdf}')
 
-        # all_pdf = 50  # 测试用
+        # all_pdf = 200  # 测试用
         # 取pdf编号入pdf_num_queue
         num = 0
         while num < all_pdf:
@@ -91,7 +91,7 @@ def main():
                 print(f'[{year_month}-{num} 网页打开失败]', end=" ")
                 print(e)
             # print(total)
-            num += 50
+            num += 100
 
         date = datetime.datetime.strptime(year_month, "%y%m").date()
         new_month = date - relativedelta(months=-1)
@@ -102,7 +102,7 @@ def main():
     pdf2txt.pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path)
 
     # 调用数据处理程序
-    print('调用数据处理程序\n\n')
+    print('\n调用数据处理程序\n')
     os.system('java -jar ' + dataProcessJar)
 
     os.system("pause")
