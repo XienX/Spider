@@ -4,11 +4,14 @@ import random
 import re
 from retrying import retry
 import os
+import queue
 import datetime
 import socket
-socket.setdefaulttimeout(0)
 
-urlHead = 'https://arxiv.org/pdf/'
+socket.setdefaulttimeout(10)
+
+urlHead = 'https://export.arxiv.org/'
+
 user_agent = ['Mozilla/5.0 (Windows NT 10.0; WOW64)', 'Mozilla/5.0 (Windows NT 6.3; WOW64)',
               'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0',
               'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -33,27 +36,29 @@ user_agent = ['Mozilla/5.0 (Windows NT 10.0; WOW64)', 'Mozilla/5.0 (Windows NT 6
               'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/3.0 Safari/536.11']
 
 
-# 两次retry之间等待1到5秒，重试5次
-@retry(stop_max_attempt_number=5, wait_random_min=1000, wait_random_max=5000)
+# 两次retry之间等待5到30秒，重试5次
+@retry(stop_max_attempt_number=5, wait_random_min=5000, wait_random_max=30000)
 def get_all(year_month):  # 获取此月CS总论文数
     # print(year_month)
-    req = urllib.request.Request(url=f'https://arxiv.org/list/cs/{year_month}',
-                                 headers={'User-Agent': random.choice(user_agent)})  # 随机从user_agent列表中抽取一个元素
-    response = urllib.request.urlopen(req, timeout=30)
+    # req = urllib.request.Request(url=f'{urlHead}list/cs/{year_month}',
+    #                              headers={'User-Agent': random.choice(user_agent)})  # 随机从user_agent列表中抽取一个元素
+    req = urllib.request.Request(url=f'{urlHead}list/cs/{year_month}')
+    response = urllib.request.urlopen(req, timeout=10)
     html = response.read().decode('utf-8')
     re_str = re.compile(r'total of \d* entries')
     result = re.search(re_str, html)  # 匹配此页上所有pdf地址
     return int(result.group().split()[2])
 
 
-# 两次retry之间等待1到5秒，重试5次
-@retry(stop_max_attempt_number=5, wait_random_min=1000, wait_random_max=5000)
+# 两次retry之间等待5到30秒，重试5次
+@retry(stop_max_attempt_number=5, wait_random_min=5000, wait_random_max=30000)
 def add_pdf(pdf_num_queue, year_month, skip):  # 根据传入的skip，将此页的pdf编号放入pdf_num_queue
     # print(f'{year_month} {skip}')
     # response = urllib.request.urlopen('https://arxiv.org/list/cs/2009?skip=50&show=25', timeout=30)
-    req = urllib.request.Request(url=f'https://arxiv.org/list/cs/{year_month}?skip={skip}&show=100',
-                                 headers={'User-Agent': random.choice(user_agent)})
-    response = urllib.request.urlopen(req, timeout=30)
+    # req = urllib.request.Request(url=f'{urlHead}list/cs/{year_month}?skip={skip}&show=100',
+    #                              headers={'User-Agent': random.choice(user_agent)})
+    req = urllib.request.Request(url=f'{urlHead}list/cs/{year_month}?skip={skip}&show=100')
+    response = urllib.request.urlopen(req, timeout=10)
     html = response.read().decode('utf-8')
     re_str = re.compile(r'/pdf/\d*\.\d*')
     datalist = re.findall(re_str, html)  # 匹配此页上所有pdf地址
@@ -68,8 +73,8 @@ def get_pdf(pdf_num_queue, pdf_file_queue, data_path):  # 下载pdf的线程
     while True:
         pdf_num = pdf_num_queue.get()
         file_name = data_path + '\\' + pdf_num + '.pdf'
-        _url = urlHead + pdf_num + '.pdf'
-        print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " downloading " + file_name)
+        _url = urlHead + 'pdf/' + pdf_num + '.pdf'
+        print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " downloading " + pdf_num + '.pdf')
         try:
             download(file_name, _url)
         except(urllib.error.URLError, OSError) as e:  # 链接打开异常处理
@@ -87,17 +92,16 @@ def get_pdf(pdf_num_queue, pdf_file_queue, data_path):  # 下载pdf的线程
             print('未知错误', end=" ")
             print(e)
         else:
-            print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " Successful to download " + file_name)
+            print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " Successful to download " + pdf_num + '.pdf')
             pdf_file_queue.put(file_name)
 
 
-# 两次retry之间等待1到5秒，重试3次
-@retry(stop_max_attempt_number=3, wait_random_min=1000,wait_random_max=5000)
+# 两次retry之间等待5到30秒，重试2次
+@retry(stop_max_attempt_number=2, wait_random_min=5000,wait_random_max=30000)
 def download(file_name, _url):  # 根据url下载pdf
-    # socket.setdefaulttimeout(10)
     # print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' ' + _url)
-    # raise TimeoutError
-    req = urllib.request.Request(url=_url, headers={'User-Agent': random.choice(user_agent)})
+    # req = urllib.request.Request(url=_url, headers={'User-Agent': random.choice(user_agent)})
+    req = urllib.request.Request(url=_url)
     # with urllib.request.urlopen(req, timeout=600) as u:
     u = urllib.request.urlopen(req, timeout=60)
     with open(file_name, 'wb') as f:
@@ -112,6 +116,12 @@ def download(file_name, _url):  # 根据url下载pdf
 
 if __name__ == '__main__':
     print('spider test')
-    file_name = r'D:\EnglishSynonymRecommendation\data\2009.00173.pdf'
-    _url = 'https://arxiv.org/pdf/2009.00173.pdf'
-    download(file_name, _url)
+    # file_name = r'D:\EnglishSynonymRecommendation\data\2009.00173.pdf'
+    # _url = 'https://arxiv.org/pdf/2009.00173.pdf'
+    # download(file_name, _url)
+
+    pdf_num_queue = queue.Queue()
+    pdf_file_queue = queue.Queue()
+    data_path = r'D:\EnglishSynonymRecommendation\data\0000'
+    pdf_num_queue.put('2010.00163')
+    get_pdf(pdf_num_queue, pdf_file_queue, data_path)

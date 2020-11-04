@@ -1,13 +1,14 @@
 # pdf转txt
 
 import os
+import queue
 import shutil
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTTextBoxHorizontal, LAParams
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfinterp import PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFParser, PDFDocument
-from pdfminer.psparser import PSException
+# from pdfminer.psparser import PSException
 import datetime
 import logging
 
@@ -21,26 +22,38 @@ def pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path):
 
     while succeed + failed < total:
         pdf = pdf_file_queue.get()
-        if pdf == '*':
+        if pdf == '*':  # 下载失败，failed
             failed += 1
-        else:
+        else:  # 下载成功
             try:
                 parse(pdf, txt_path)
-            except PSException:
-                if pdf in re_download:
+            except Exception:  # 转txt异常
+                if pdf in re_download:  # 两次打开错误，failed
                     re_download.remove(pdf)
                     print(f'[{pdf} 再次打开失败，放弃]')
                     failed += 1
-                else:
+
+                    txt_name = txt_path + pdf[-15:-4] + '.txt'
+                    try:
+                        if os.path.exists(txt_name):
+                            os.remove(txt_name)
+                    except Exception as e:
+                        print(txt_name + ' 删除失败', end=" ")
+                        print(e)
+                else:  # 第一次打开错误，重下一次
                     print(f'[{pdf} 打开失败]')
                     pdf_num_queue.put(pdf[-14:-4])
                     re_download.add(pdf)
-            else:
+            else:  # 转txt成功
                 succeed += 1
                 if pdf in re_download:
                     re_download.remove(pdf)
 
-            os.remove(pdf)
+            try:  # 删除pdf原文件
+                os.remove(pdf)
+            except Exception as e:
+                print(f'{pdf}删除失败', end=" ")
+                print(e)
 
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' pdf to txt [{succeed}/{total} succeed, {failed}/{total} failed]')
 
@@ -69,7 +82,6 @@ def parse(pdf, txt_path):
     if not doc.is_extractable:
         raise PDFTextExtractionNotAllowed
     else:
-        f = open(txt_path + pdf[-15:-4] + '.txt', 'w', encoding='utf-8')
         # 创建PDf资源管理器 来管理共享资源
         rsrcmgr = PDFResourceManager()
 
@@ -82,29 +94,38 @@ def parse(pdf, txt_path):
         # 创建一个PDF页面解释器对象
         interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-        # 循环遍历列表，每次处理一页的内容
-        # doc.get_pages() 获取page列表
-        for page in doc.get_pages():
-            # print(page)
-            # 使用页面解释器来读取
-            interpreter.process_page(page)
+        with open(txt_path + pdf[-15:-4] + '.txt', 'w', encoding='utf-8') as f:
+            # 循环遍历列表，每次处理一页的内容
+            # doc.get_pages() 获取page列表
+            for page in doc.get_pages():
+                # print(page)
+                # 使用页面解释器来读取
+                interpreter.process_page(page)
 
-            # 使用聚合器获取内容
-            layout = device.get_result()
+                # 使用聚合器获取内容
+                layout = device.get_result()
 
-            # 这里layout是一个LTPage对象,里面存放着这个page解析出的各种对象,一般包括LTTextBox,LTFigure,LTImage,LTTextBoxHorizontal等等想要获取文本就获得对象的text属性，
-            for out in layout:
-                # 判断是否含有get_text()方法，图片之类的就没有
-                # if hasattr(out,"get_text"):
-                if isinstance(out, LTTextBoxHorizontal):
-                    results = out.get_text()
-                    f.write(results)
-        f.close()
+                # 这里layout是一个LTPage对象,里面存放着这个page解析出的各种对象,一般包括LTTextBox,LTFigure,LTImage,LTTextBoxHorizontal等等想要获取文本就获得对象的text属性，
+                for out in layout:
+                    # 判断是否含有get_text()方法，图片之类的就没有
+                    # if hasattr(out,"get_text"):
+                    if isinstance(out, LTTextBoxHorizontal):
+                        results = out.get_text()
+                        f.write(results)
     fp.close()
 
 
 if __name__ == '__main__':
     print('pdf2txt test')
-    pdf_name = r'D:\EnglishSynonymRecommendation\data\2009.00001.pdf'
-    path = r'D:\EnglishSynonymRecommendation\data'
-    parse(pdf_name, path)
+    # pdf_name = r'D:\EnglishSynonymRecommendation\data\2009.00001.pdf'
+    # path = r'D:\EnglishSynonymRecommendation\data'
+    # parse(pdf_name, path)
+
+    num_queue = queue.Queue()
+    file_queue = queue.Queue()
+    temp = r'D:\EnglishSynonymRecommendation\data\0000'
+    txt = r'D:\EnglishSynonymRecommendation\data\2011'
+    # file_queue.put(r'D:\EnglishSynonymRecommendation\data\0000\2010.09847.pdf')
+    file_queue.put(r'D:\EnglishSynonymRecommendation\data\0000\2010.00163.pdf')
+    to = 1
+    pdf_to_txt(num_queue, file_queue, to, temp, txt)
