@@ -26,7 +26,7 @@ def pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path):
             failed += 1
         else:  # 下载成功
             try:
-                parse(pdf, txt_path)
+                parse(pdf, txt_path + pdf[-15:-4] + '.txt')
             except Exception:  # 转txt异常
                 if pdf in re_download:  # 两次打开错误，failed
                     re_download.remove(pdf)
@@ -61,7 +61,7 @@ def pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path):
     shutil.rmtree(temp_path)
 
 
-def parse(pdf, txt_path):
+def parse(pdf, txt_name):
     fp = open(pdf, 'rb')
 
     # 用文件对象来创建一个pdf文档分析器
@@ -94,7 +94,7 @@ def parse(pdf, txt_path):
         # 创建一个PDF页面解释器对象
         interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-        with open(txt_path + pdf[-15:-4] + '.txt', 'w', encoding='utf-8') as f:
+        with open(txt_name, 'w', encoding='utf-8') as f:
             # 循环遍历列表，每次处理一页的内容
             # doc.get_pages() 获取page列表
             for page in doc.get_pages():

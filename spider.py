@@ -7,6 +7,12 @@ import os
 import queue
 import datetime
 import socket
+import sys
+import shutil
+from pathlib import Path
+
+import main
+import pdf2txt
 
 socket.setdefaulttimeout(10)
 
@@ -114,14 +120,79 @@ def download(file_name, _url):  # 根据url下载pdf
     u.close()
 
 
-if __name__ == '__main__':
-    print('spider test')
-    # file_name = r'D:\EnglishSynonymRecommendation\data\2009.00173.pdf'
-    # _url = 'https://arxiv.org/pdf/2009.00173.pdf'
-    # download(file_name, _url)
+def download_singer_pdf(url): #单独下载任意pdf链接+转txt
+    print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 下载中...')
 
-    pdf_num_queue = queue.Queue()
-    pdf_file_queue = queue.Queue()
-    data_path = r'D:\EnglishSynonymRecommendation\data\0000'
-    pdf_num_queue.put('2010.00163')
-    get_pdf(pdf_num_queue, pdf_file_queue, data_path)
+    temp_path = main.filePath + '\\0000'
+    txt_path = main.filePath + '\\9999'
+
+    # 删除可能遗留的文件夹
+    path = Path(temp_path)
+    if path.is_dir():
+        shutil.rmtree(temp_path)
+    path = Path(txt_path)
+    if path.is_dir():
+        shutil.rmtree(txt_path)
+
+    # 创建文件夹
+    os.mkdir(temp_path)
+    os.mkdir(txt_path)
+
+    # 下载
+    rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |' # new_title = re.sub(rstr, "_", title)  # 替换为下划线
+    if url[-4:] == '.pdf':
+        pdf_name = temp_path + '\\' + re.sub(rstr, "_", url)
+    else:
+        pdf_name = temp_path + '\\' + re.sub(rstr, "_", url) + '.pdf'
+
+    try:
+        download(pdf_name, url)
+    except(urllib.error.URLError, OSError) as e:  # 链接打开异常处理
+        print(f'[{url} 网页打开失败]', end=" ")
+        print(e)
+    except Exception as e:
+        print('未知错误', end=" ")
+        print(e)
+    else:
+        print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " Successful to download ")
+
+        # pdf转txt
+        txt_name = txt_path + '\\' + re.sub(rstr, "_", url) + '.txt'
+        try:
+            pdf2txt.parse(pdf_name, txt_name)
+        except Exception:  # 转txt异常
+            print(f'[{pdf_name} 打开失败]')
+        else:  # 转txt成功
+            print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' pdf to txt succeed')
+            # 调用数据处理程序
+            print('\n调用数据处理程序\n')
+            os.system('java -jar ' + main.dataProcessJar)
+
+    # 删除文件夹
+    if path.is_dir():
+        shutil.rmtree(temp_path)
+    if path.is_dir():
+        shutil.rmtree(txt_path)
+
+    os.system("pause")
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('error: 需要一个参数：PDF链接')
+        os.system("pause")
+        exit(0)
+
+    download_singer_pdf(sys.argv[1])
+
+
+    # print('spider test')
+    # # file_name = r'D:\EnglishSynonymRecommendation\data\2009.00173.pdf'
+    # # _url = 'https://arxiv.org/pdf/2009.00173.pdf'
+    # # download(file_name, _url)
+    #
+    # pdf_num_queue = queue.Queue()
+    # pdf_file_queue = queue.Queue()
+    # data_path = r'D:\EnglishSynonymRecommendation\data\0000'
+    # pdf_num_queue.put('2010.00163')
+    # get_pdf(pdf_num_queue, pdf_file_queue, data_path)
