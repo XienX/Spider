@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # pdf转txt
 
 import os
@@ -58,7 +59,15 @@ def pdf_to_txt(pdf_num_queue, pdf_file_queue, total, temp_path, txt_path):
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' pdf to txt [{succeed}/{total} succeed, {failed}/{total} failed]')
 
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' 完成，共计{total}个下载任务，成功{succeed}个，失败{failed}个')
-    shutil.rmtree(temp_path)
+
+    try:
+        shutil.rmtree(temp_path)
+    except Exception as e:
+        try:
+            shutil.rmtree(temp_path)
+        except Exception as e:
+            print(f'{temp_path}目录删除失败', end=" ")
+            print(e)
 
 
 def parse(pdf, txt_name):

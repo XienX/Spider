@@ -34,8 +34,7 @@
 >`python main.py`进行批量数据爬取  
   
 >`python spider.py [pdf网址]`进行单个pdf数据爬取  
->例如`python spider.py python spider.py https://export.arxiv.org/pdf/2010.00288.pdf`   
+>例如`python spider.py https://export.arxiv.org/pdf/2010.00288.pdf`   
 >或`python spider.py https://www.nature.com/articles/1001604.pdf?origin=ppub`  
 >理论上对所有在浏览器端能正常打开的pdf网址都可运行  
->
 

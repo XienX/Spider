@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # 处理实际网页
 import urllib.request
 import random
@@ -17,29 +18,6 @@ import pdf2txt
 socket.setdefaulttimeout(10)
 
 urlHead = 'https://export.arxiv.org/'
-
-user_agent = ['Mozilla/5.0 (Windows NT 10.0; WOW64)', 'Mozilla/5.0 (Windows NT 6.3; WOW64)',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0',
-              'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-              'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
-              'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; rv:11.0) like Gecko)',
-              'Mozilla/5.0 (Windows; U; Windows NT 5.2) Gecko/2008070208 Firefox/3.0.1',
-              'Mozilla/5.0 (Windows; U; Windows NT 5.1) Gecko/20070309 Firefox/2.0.0.3',
-              'Mozilla/5.0 (Windows; U; Windows NT 5.1) Gecko/20070803 Firefox/1.5.0.12',
-              'Opera/9.27 (Windows NT 5.2; U; zh-cn)',
-              'Mozilla/5.0 (Macintosh; PPC Mac OS X; U; en) Opera 8.0',
-              'Opera/8.0 (Macintosh; PPC Mac OS X; U; en)',
-              'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080219 Firefox/2.0.0.12 Navigator/9.0.0.6',
-              'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Win64; x64; Trident/4.0)',
-              'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)',
-              'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.2; .NET4.0C; .NET4.0E)',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Maxthon/4.0.6.2000 Chrome/26.0.1410.43 Safari/537.1 ',
-              'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.2; .NET4.0C; .NET4.0E; QQBrowser/7.3.9825.400)',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0 ',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.92 Safari/537.1 LBBROWSER',
-              'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0; BIDUBrowser 2.x)',
-              'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/3.0 Safari/536.11']
 
 
 # 两次retry之间等待5到30秒，重试5次
@@ -78,7 +56,7 @@ def add_pdf(pdf_num_queue, year_month, skip):  # 根据传入的skip，将此页
 def get_pdf(pdf_num_queue, pdf_file_queue, data_path):  # 下载pdf的线程
     while True:
         pdf_num = pdf_num_queue.get()
-        file_name = data_path + '\\' + pdf_num + '.pdf'
+        file_name = data_path + '/' + pdf_num + '.pdf'
         _url = urlHead + 'pdf/' + pdf_num + '.pdf'
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " downloading " + pdf_num + '.pdf')
         try:
@@ -123,8 +101,8 @@ def download(file_name, _url):  # 根据url下载pdf
 def download_singer_pdf(url): #单独下载任意pdf链接+转txt
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 下载中...')
 
-    temp_path = main.filePath + '\\0000'
-    txt_path = main.filePath + '\\9999'
+    temp_path = main.filePath + '/0000'
+    txt_path = main.filePath + '/9999'
 
     # 删除可能遗留的文件夹
     path = Path(temp_path)
@@ -141,9 +119,9 @@ def download_singer_pdf(url): #单独下载任意pdf链接+转txt
     # 下载
     rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |' # new_title = re.sub(rstr, "_", title)  # 替换为下划线
     if url[-4:] == '.pdf':
-        pdf_name = temp_path + '\\' + re.sub(rstr, "_", url)
+        pdf_name = temp_path + '/' + re.sub(rstr, "_", url)
     else:
-        pdf_name = temp_path + '\\' + re.sub(rstr, "_", url) + '.pdf'
+        pdf_name = temp_path + '/' + re.sub(rstr, "_", url) + '.pdf'
 
     try:
         download(pdf_name, url)
@@ -157,7 +135,7 @@ def download_singer_pdf(url): #单独下载任意pdf链接+转txt
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + " Successful to download ")
 
         # pdf转txt
-        txt_name = txt_path + '\\' + re.sub(rstr, "_", url) + '.txt'
+        txt_name = txt_path + '/' + re.sub(rstr, "_", url) + '.txt'
         try:
             pdf2txt.parse(pdf_name, txt_name)
         except Exception:  # 转txt异常
@@ -173,8 +151,6 @@ def download_singer_pdf(url): #单独下载任意pdf链接+转txt
         shutil.rmtree(temp_path)
     if path.is_dir():
         shutil.rmtree(txt_path)
-
-    os.system("pause")
 
 
 if __name__ == '__main__':

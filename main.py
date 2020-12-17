@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # 爬虫入口
 # XieXin
 # 2020/10
@@ -9,6 +10,7 @@
 # https://export.arxiv.org/pdf/2009.00001.pdf
 # https://export.arxiv.org/list/cs/2010
 
+import sys
 import urllib.request
 import urllib.error
 import datetime
@@ -21,12 +23,21 @@ import shutil
 import spider
 import pdf2txt
 
-filePath = r'D:\EnglishSynonymRecommendation\data'  # 在此配置文件放置位置
-dataProcessJar = r'D:\EnglishSynonymRecommendation\EngLishLearner\out\artifacts\DataProcessing_jar\DataProcessing.jar'  # 在此配置数据处理程序
+# filePath = r'D:\EnglishSynonymRecommendation\data'  # 在此配置文件放置位置
+# dataProcessJar = r'D:\EnglishSynonymRecommendation\EngLishLearner\out\artifacts\DataProcessing_jar\DataProcessing.jar'  # 在此配置数据处理程序
+# thread_num = 100  # 在此配置爬虫线程数
+# is_print_to_logfile = True  # 是否以文件形式打印日志
+# logPath = r'D:\EnglishSynonymRecommendation\spiderLog'  # 在此配置日志文件放置位置
+
+filePath = '/usr/local/EnglishSynonymRecommendation/data'  # 在此配置文件放置位置
+dataProcessJar = '/usr/local/EnglishSynonymRecommendation/DataProcessing.jar'  # 在此配置数据处理程序
 thread_num = 100  # 在此配置爬虫线程数
+is_print_to_logfile = True  # 是否以文件形式打印日志
+logPath = '/usr/local/EnglishSynonymRecommendation/spiderLog'  # 在此配置日志文件放置位置
 
 
 def main():
+    sys.stdout = Logger(logPath + '/' + str(datetime.datetime.now().timestamp()) + '.txt')
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 爬虫运行...')
 
     pdf_num_queue = queue.Queue()
@@ -39,7 +50,7 @@ def main():
     dirs = os.listdir(filePath)
     if len(dirs) > 1:
         print('[error]目标目录下存在多个文件夹，请检查')
-        os.system("pause")
+        # os.system("pause")
         exit(0)
     elif len(dirs) == 0:
         print('没有运行记录，默认爬取上月数据')
@@ -49,16 +60,16 @@ def main():
         year_month = dirs[0]
         if year_month == now_year_month:  # 检查本月应爬文件的文件夹是否存在
             print('本月已运行过爬虫！')
-            os.system("pause")
+            # os.system("pause")
             exit(0)
-        shutil.rmtree(filePath + '\\' + year_month)  # 删除上次运行遗留的文件夹
+        shutil.rmtree(filePath + '/' + year_month)  # 删除上次运行遗留的文件夹
 
     # 创建本次txt数据存储文件夹
-    txt_path = filePath + '\\' + now_year_month
+    txt_path = filePath + '/' + now_year_month
     os.mkdir(txt_path)
 
     # 创建pdf数据临时存储文件夹
-    temp_path = filePath + '\\0000'
+    temp_path = filePath + '/0000'
     os.mkdir(temp_path)
 
     # 创建爬虫线程池，运行
@@ -74,16 +85,10 @@ def main():
         except(urllib.error.URLError, OSError) as e:  # 链接打开异常处理
             print(f'[{year_month} 网页打开失败]', end=" ")
             print(e)
-            # if hasattr(e, "code"):  # 判断是否有状态码
-            #     print('e.code')
-            #     print(e.code)  # 状态码
-            # if hasattr(e, "reason"):  # 判断是否有异常原因
-            #     print('e.reason')
-            #     print(e.reason)  # 异常原因
             all_pdf = 0
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' {year_month} 论文数: {all_pdf}')
 
-        # all_pdf = 100  # 测试用
+        all_pdf = 100  # 测试用
         # 取pdf编号入pdf_num_queue
         num = 0
         while num < all_pdf:
@@ -105,9 +110,27 @@ def main():
 
     # 调用数据处理程序
     print('\n调用数据处理程序\n')
-    os.system('java -jar ' + dataProcessJar)
+    try:
+        os.system('java -jar ' + dataProcessJar)
+    except Exception as e:
+        print(e)
 
-    os.system("pause")
+    print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 结束')
+    exit(0)
+
+
+class Logger:
+    def __init__(self, filename=r"D:\EnglishSynonymRecommendation\spiderLog\log.txt"):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        self.log.flush()
+
+    def flush(self):
+        pass
 
 
 if __name__ == '__main__':
