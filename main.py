@@ -16,9 +16,9 @@ import urllib.error
 import datetime
 from dateutil.relativedelta import relativedelta
 import queue
-from concurrent.futures import ThreadPoolExecutor
 import os
 import shutil
+import threading
 
 import spider
 import pdf2txt
@@ -72,10 +72,16 @@ def main():
     temp_path = filePath + '/0000'
     os.mkdir(temp_path)
 
-    # 创建爬虫线程池，运行
-    thread_pool = ThreadPoolExecutor(thread_num)  # 创建线程池，进行下载任务
-    for i in range(thread_num):
-        thread_pool.submit(spider.get_pdf, pdf_num_queue, pdf_file_queue, temp_path)
+    # # 创建爬虫线程池，运行
+    # thread_pool = ThreadPoolExecutor(thread_num)  # 创建线程池，进行下载任务
+    # for i in range(thread_num):
+    #     thread_pool.submit(spider.get_pdf, pdf_num_queue, pdf_file_queue, temp_path)
+
+    # 创建爬虫守护线程，运行
+    threads = [threading.Thread(target=spider.get_pdf, args=(pdf_num_queue, pdf_file_queue, temp_path)) for i in range(thread_num)]
+    for t in threads:
+        t.setDaemon(True)
+        t.start()
 
     # 获取所有待爬文件
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 获取论文链接...')
@@ -88,7 +94,7 @@ def main():
             all_pdf = 0
         print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + f' {year_month} 论文数: {all_pdf}')
 
-        all_pdf = 100  # 测试用
+        # all_pdf = 100  # 测试用
         # 取pdf编号入pdf_num_queue
         num = 0
         while num < all_pdf:
@@ -116,7 +122,6 @@ def main():
         print(e)
 
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 结束')
-    exit(0)
 
 
 class Logger:
