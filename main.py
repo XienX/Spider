@@ -37,7 +37,9 @@ logPath = '/usr/local/EnglishSynonymRecommendation/spiderLog'  # 在此配置日
 
 
 def main():
-    sys.stdout = Logger(logPath + '/' + str(datetime.datetime.now().timestamp()) + '.txt')
+    if is_print_to_logfile:
+        sys.stdout = Logger(logPath + '/' + str(datetime.datetime.now().timestamp()) + '.txt')
+
     print(datetime.datetime.now().strftime("%y/%m/%d %H:%M") + ' 爬虫运行...')
 
     pdf_num_queue = queue.Queue()
